@@ -91,6 +91,8 @@ ideas), see `docs/ROADMAP.md`.
 - [x] Step 2 — shared chrome (verified: desktop + mobile hamburger screenshots)
 - [x] Step 3 — consent gate (verified: all 6 states via curl/DB, focus trap + Esc/backdrop +
       inert via Playwright, mobile bottom sheet screenshot)
+- [x] Step 4 — the four pages (verified: all 4 pages at 375/768/1440, contact form validation
+      + success + DB row + real mail() delivery, live consent-record callout on legal pages)
 - [ ] Step 4 — the four pages
 - [ ] Step 5 — admin portal
 - [ ] Step 6 — harden and verify (all 6 consent states, no-JS path)

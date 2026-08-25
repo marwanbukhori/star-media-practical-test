@@ -47,6 +47,17 @@ final class Consent
     }
 
     /**
+     * The visitor's own accepted-consent record, for display (e.g. the "Your consent record"
+     * callout on the legal pages). Null if they've never accepted or their cookie is gone.
+     *
+     * @return array{guid: string, accepted_at: string, version: int}|null
+     */
+    public static function currentRecord(): ?array
+    {
+        return self::readAcceptCookie();
+    }
+
+    /**
      * @return array{visible: bool, dismissible: bool}
      */
     public static function dialogState(): array
