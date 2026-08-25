@@ -108,4 +108,11 @@ ideas), see `docs/ROADMAP.md`.
       confirmed (via network trace) that fputcsv() deprecation warnings from step 5 don't
       recur. One false alarm investigated and ruled out (header nav at 768px looked tight in a
       screenshot but has a full 24px margin on inspection).
-- [ ] Step 7 — deliverables (finalize README, git init, one clean commit)
+- [x] Step 7 — deliverables. Finalized root README.md (setup steps, admin seeding, local email
+      testing, consent cookie + DB design rationale) and verified it end-to-end against a true
+      fresh `git clone` of the pushed repo — schema import, config copy, server start, admin
+      seed, and every route all worked exactly as documented, with a clean server log. Fixed
+      two README issues while at it: it referenced `docs/handoff/` (gitignored, wouldn't exist
+      for a cloner) and used an SSH clone URL (assumes the reviewer's own SSH key access) —
+      both corrected. git init/commits happened incrementally per step rather than one final
+      commit, per your direction.
