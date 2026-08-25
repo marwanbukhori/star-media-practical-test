@@ -1,0 +1,109 @@
+/* Star Theme Kit v1.0 — token layer. Load first, before site.css. */
+@import url("https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap");
+
+:root {
+  /* Brand — red is Star Media Group's official corporate colour. Signal, not wallpaper. */
+  --smg-red:       #E4002B;
+  --smg-red-ink:   #B4001B;
+  --smg-red-deep:  #7E0013;
+
+  /* Ink & paper */
+  --smg-ink:       #12171C;
+  --smg-ink-soft:  #1B2229;
+  --smg-ink-line:  #2E3841;
+  --smg-slate:     #4A5560;
+  --smg-muted:     #6C7883;
+  --smg-quiet:     #8A959E;
+  --smg-on-ink:    #B9C1C9;
+  --smg-paper:     #FFFFFF;
+  --smg-newsprint: #F6F4F1;
+  --smg-rule:      #E4DFD8;
+  --smg-rule-soft: #EFEBE5;
+  --smg-field:     #C9C3BA;
+
+  /* Consent states */
+  --smg-accepted:     #0B4F3F;
+  --smg-accepted-bg:  #E7F0ED;
+  --smg-declined:     #8A5A00;
+  --smg-declined-bg:  #FBF2E2;
+  --smg-expired:      #6C7883;
+  --smg-expired-bg:   #F1EEEA;
+  --smg-error-bg:     #FFF7F8;
+  --smg-tint-red:     #FFE9ED;
+
+  /* Type */
+  --smg-font-display: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --smg-font-ui:      "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  --smg-font-mono:    "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --smg-text-hero:    clamp(34px, 8vw, 62px);
+  --smg-text-h1:      clamp(30px, 6vw, 46px);
+  --smg-text-h2:      clamp(22px, 3.4vw, 28px);
+  --smg-text-h3:      21px;
+  --smg-text-body:    16.5px;
+  --smg-text-sm:      14.5px;
+  --smg-text-xs:      12.5px;
+  --smg-text-eyebrow: 11.5px;
+
+  --smg-leading-tight: 1.06;
+  --smg-leading-head:  1.2;
+  --smg-leading-body:  1.68;
+  --smg-track-display: -0.028em;
+  --smg-track-eyebrow: 0.14em;
+
+  /* Space — 4px base */
+  --smg-space-1: 4px;   --smg-space-2: 8px;   --smg-space-3: 12px;
+  --smg-space-4: 16px;  --smg-space-6: 24px;  --smg-space-8: 32px;
+  --smg-space-12: 48px; --smg-space-16: 64px; --smg-space-24: 96px;
+
+  /* Structure */
+  --smg-container: 1180px;
+  --smg-measure:   40em;
+  --smg-gutter:    24px;
+  --smg-header-h:  68px;
+  --smg-radius:    2px;
+  --smg-shadow-card:  0 1px 2px rgba(18, 23, 28, .06);
+  --smg-shadow-modal: 0 18px 48px rgba(18, 23, 28, .22);
+  --smg-shadow-dialog:0 18px 48px rgba(18, 23, 28, .34);
+  --smg-focus-ring:   0 0 0 3px rgba(228, 0, 43, .14);
+  --smg-scrim:        rgba(18, 23, 28, .62);
+  --smg-ease:         cubic-bezier(.2, .7, .3, 1);
+  --smg-z-consent:    9000;
+}
+
+@media (min-width: 900px) { :root { --smg-gutter: 54px; } }
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html.smg-locked { overflow: hidden; }
+
+body {
+  margin: 0;
+  font-family: var(--smg-font-ui);
+  font-size: var(--smg-text-body);
+  line-height: var(--smg-leading-body);
+  color: var(--smg-slate);
+  background: var(--smg-newsprint);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3 {
+  font-family: var(--smg-font-display);
+  color: var(--smg-ink);
+  letter-spacing: var(--smg-track-display);
+  line-height: var(--smg-leading-head);
+  text-wrap: balance;
+}
+
+p { text-wrap: pretty; }
+
+a { color: var(--smg-red-ink); text-decoration: none; }
+a:hover { color: var(--smg-red-deep); text-decoration: underline; text-underline-offset: 3px; }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: 2px solid var(--smg-red);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+}

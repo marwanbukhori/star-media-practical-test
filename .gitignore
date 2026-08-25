@@ -1,0 +1,13 @@
+/config.php
+.DS_Store
+*.log
+
+# Original handoff bundle (confidential PDF + design reference) — kept locally for
+# reference while building, never committed.
+/docs/handoff/
+
+# Own working prompt sequence — not part of the deliverable.
+/PROMPTS.md
+
+# Browser-automation debug output from manual verification passes.
+.playwright-mcp/
