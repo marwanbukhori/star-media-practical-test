@@ -93,6 +93,8 @@ ideas), see `docs/ROADMAP.md`.
       inert via Playwright, mobile bottom sheet screenshot)
 - [x] Step 4 — the four pages (verified: all 4 pages at 375/768/1440, contact form validation
       + success + DB row + real mail() delivery, live consent-record callout on legal pages)
+- [x] Step 5 — admin portal (verified: auth guard, login, dashboard stats/search/pagination,
+      CSV export content, 5/min rate limit at the 6th attempt, session_regenerate_id on login)
 - [ ] Step 4 — the four pages
 - [ ] Step 5 — admin portal
 - [ ] Step 6 — harden and verify (all 6 consent states, no-JS path)

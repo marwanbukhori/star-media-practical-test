@@ -8,6 +8,12 @@ require __DIR__ . '/../src/Consent.php';
 use Smg\Consent;
 use Smg\Csrf;
 
+session_set_cookie_params([
+    'path' => '/',
+    'httponly' => true,
+    'samesite' => 'Lax',
+    'secure' => Consent::isSecureContext(),
+]);
 session_start();
 
 $action = $_POST['action'] ?? null;

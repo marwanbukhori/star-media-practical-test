@@ -206,13 +206,14 @@ final class Consent
         setcookie($name, $value, [
             'expires' => time() + $ttlSeconds,
             'path' => '/',
-            'secure' => self::cookiesSecure(),
+            'secure' => self::isSecureContext(),
             'httponly' => true,
             'samesite' => 'Lax',
         ]);
     }
 
-    private static function cookiesSecure(): bool
+    /** Whether cookies should get the Secure flag — used for the session cookie too. */
+    public static function isSecureContext(): bool
     {
         $config = self::config();
         $forced = $config['app']['force_https'] ?? null;
