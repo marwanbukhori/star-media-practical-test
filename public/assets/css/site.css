@@ -1239,9 +1239,11 @@
 
   .smg-admin-table-card__controls {
     width: 100%;
+    flex-wrap: wrap;
   }
 
   .smg-admin-table-card__controls input[type="search"] {
-    flex: 1;
+    flex: 1 1 100%;
+    width: auto;
   }
 }

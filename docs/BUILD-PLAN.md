@@ -97,5 +97,15 @@ ideas), see `docs/ROADMAP.md`.
       CSV export content, 5/min rate limit at the 6th attempt, session_regenerate_id on login)
 - [ ] Step 4 — the four pages
 - [ ] Step 5 — admin portal
-- [ ] Step 6 — harden and verify (all 6 consent states, no-JS path)
+- [x] Step 6 — harden and verify. Static audit: every DB call is a prepared statement (one
+      remaining ->query() converted), every echo of user/DB data confirmed escaped (one gap
+      found in the CSV export link and fixed), CSRF confirmed enforced + rejection tested on
+      all 3 POST endpoints, cookie flags consistent everywhere, zero raw hex in site.css, fresh
+      schema.sql import verified, git history confirmed secret-free. Dynamic: all 6 consent
+      states re-verified against the real pages (not the old harness) on all 4 public pages,
+      manage-reopen dismissibility confirmed, no-JS path is what curl exercises throughout.
+      Fixed 2 real bugs: a mobile horizontal-overflow on the admin search/export controls, and
+      confirmed (via network trace) that fputcsv() deprecation warnings from step 5 don't
+      recur. One false alarm investigated and ruled out (header nav at 768px looked tight in a
+      screenshot but has a full 24px margin on inspection).
 - [ ] Step 7 — deliverables (finalize README, git init, one clean commit)

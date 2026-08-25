@@ -36,7 +36,9 @@ $listStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
 $listStmt->execute();
 $rows = $listStmt->fetchAll();
 
-$acceptedTotal = (int) $pdo->query("SELECT COUNT(*) AS c FROM consent_log WHERE action = 'accepted'")->fetch()['c'];
+$acceptedStmt = $pdo->prepare("SELECT COUNT(*) AS c FROM consent_log WHERE action = 'accepted'");
+$acceptedStmt->execute();
+$acceptedTotal = (int) $acceptedStmt->fetch()['c'];
 
 $todayStartMst = new DateTimeImmutable('today', $mstTz);
 $todayEndMst = $todayStartMst->modify('+1 day');
@@ -125,7 +127,8 @@ function smg_page_url(int $page, string $q): string
         <form method="get" action="index.php" class="smg-admin-table-card__controls">
           <input type="search" name="q" placeholder="Search GUID" value="<?php echo htmlspecialchars($q, ENT_QUOTES, 'UTF-8'); ?>">
           <button type="submit" class="smg-btn smg-btn--ghost smg-btn--sm">Search</button>
-          <a class="smg-btn smg-btn--ghost smg-btn--sm" href="export.php<?php echo $q !== '' ? '?' . http_build_query(['q' => $q]) : ''; ?>">Export CSV</a>
+          <?php $exportHref = 'export.php' . ($q !== '' ? '?' . http_build_query(['q' => $q]) : ''); ?>
+          <a class="smg-btn smg-btn--ghost smg-btn--sm" href="<?php echo htmlspecialchars($exportHref, ENT_QUOTES, 'UTF-8'); ?>">Export CSV</a>
         </form>
       </div>
 
