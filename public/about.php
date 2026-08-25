@@ -28,7 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contact_submit'])) {
 
     $csrfToken = $_POST['csrf_token'] ?? null;
     if (!Csrf::verify(is_string($csrfToken) ? $csrfToken : null)) {
-        $errors['form'] = 'Your session expired — please try again.';
+        $errors['form'] = 'Your session expired. Please try again.';
     }
     if ($values['full_name'] === '' || mb_strlen($values['full_name']) > 120) {
         $errors['full_name'] = 'Enter your full name.';
@@ -94,8 +94,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contact_submit'])) {
         <div class="smg-about-copy">
           <p class="smg-lede">We're an integrated media company operating across print, digital, broadcast
             and events, built around one newsroom and one set of editorial standards.</p>
-          <p>Founded to serve readers across Malaysia, we've grown alongside the audiences we cover —
-            from daily print to on-demand video, always grounded in accountable journalism.</p>
+          <p>Founded to serve readers across Malaysia, we've grown alongside the audiences we cover.
+            From daily print to on-demand video, we stay grounded in accountable journalism.</p>
 
           <div class="smg-facts">
             <div class="smg-fact">
@@ -118,7 +118,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contact_submit'])) {
           <p class="smg-form-card__note">We typically respond within one business day.</p>
 
           <?php if ($sent): ?>
-            <p class="smg-form-banner smg-form-banner--success">Thanks — your message has been sent. We'll be in touch soon.</p>
+            <p class="smg-form-banner smg-form-banner--success">Thanks! Your message has been sent. We'll be in touch soon.</p>
           <?php endif; ?>
           <?php if (!empty($errors['form'])): ?>
             <p class="smg-form-banner smg-form-banner--error"><?php echo htmlspecialchars($errors['form'], ENT_QUOTES, 'UTF-8'); ?></p>

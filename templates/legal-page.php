@@ -60,7 +60,7 @@ $currentScript = basename($_SERVER['SCRIPT_NAME'] ?? 'privacy.php');
           <div class="smg-consent-record">
             <p class="smg-eyebrow smg-eyebrow--muted">Your consent record</p>
             <?php if ($record !== null): ?>
-              <p class="smg-consent-record__explainer">This is the consent record stored on this device. It identifies your browser only — never your name or email.</p>
+              <p class="smg-consent-record__explainer">This is the consent record stored on this device. It identifies your browser only, never your name or email.</p>
               <div class="smg-consent-record__chips">
                 <span class="smg-chip">guid: <?php echo htmlspecialchars($record['guid'], ENT_QUOTES, 'UTF-8'); ?></span>
                 <span class="smg-chip">accepted_at: <?php echo htmlspecialchars((string) $acceptedLabel, ENT_QUOTES, 'UTF-8'); ?></span>

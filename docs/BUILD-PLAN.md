@@ -141,3 +141,25 @@ ideas), see `docs/ROADMAP.md`.
       at 375px, zero horizontal overflow, zero console errors, and the full no-JS HTML via curl.
       Hero/platform/about photos are wired to check for the file and render nothing if absent
       (`smg_asset_or_placeholder()`) — pending real photo files.
+- [x] Post-submission — real photos, moved-up marquee, fixed a real scroll bug, humanized copy.
+      **Photos**: retrieved directly from starmediagroup.my's live HTML (not invented) — the real
+      HQ building (aerial photo with their rooftop signage, cropped for the hero), a real Star
+      Education Fund scholarship photo (About teaser), a real Star Outstanding Business Awards
+      event photo (the "Events & video" platform panel), and all 17 real brand logos for the
+      marquee. The brand logos were flat JPEGs with solid white backgrounds; wrote a second GD
+      script to convert them to transparent PNGs (feathered edge, not a hard cutout) so they float
+      cleanly on the dark marquee band instead of showing white boxes. Redesigned the platform
+      carousel into two panel variants (`--photo`: full-bleed + gradient scrim, for the one real
+      photo; `--logo`: light background + contained mark + caption below, for the 3 brand-logo
+      panels) rather than forcing one treatment on mismatched content types.
+      **Layout**: moved the marquee to right after the hero (was after the stats strip) so it's
+      visible without scrolling on first load, per your feedback.
+      **Bug found and fixed**: the recognition carousel's 5-second auto-advance used
+      `scrollIntoView()`, which scrolls the whole page vertically when its target isn't already
+      in the viewport, not just the carousel horizontally — so the page would jump down on its
+      own shortly after opening. Fixed by scrolling the track element directly
+      (`track.scrollTo({left: panel.offsetLeft})`) in both carousels, and gated the auto-advance
+      behind an IntersectionObserver so it only runs while the section is actually visible.
+      **Copy**: removed every em dash from visible page copy (about/privacy/terms/legal-page too,
+      not just the homepage) and rewrote the affected sentences in plainer, more conversational
+      language rather than just swapping punctuation.

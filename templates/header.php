@@ -1,8 +1,8 @@
 <?php
 /**
  * @var string $activePage      'home'|'about'|'privacy'|'terms'
- * @var bool   $consentGateOpen True while the blocking consent dialog is forced open —
- *                              marks this chrome inert so it can't be tabbed into behind it.
+ * @var bool   $consentGateOpen True while the blocking consent dialog is forced open.
+ *                              Marks this chrome inert so it can't be tabbed into behind it.
  */
 $activePage = $activePage ?? '';
 $consentGateOpen = $consentGateOpen ?? false;

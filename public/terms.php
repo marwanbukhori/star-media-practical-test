@@ -19,9 +19,9 @@ $tocItems = [
 ob_start();
 ?>
 <h2 id="acceptable-use">Acceptable use</h2>
-<p>By using this site, you agree not to misuse it — including attempting to disrupt its
-operation, access data you're not authorised to see, or submit false or malicious content
-through the contact form.</p>
+<p>By using this site, you agree not to misuse it. That means no trying to disrupt how it
+operates, no accessing data you're not authorised to see, and no submitting false or malicious
+content through the contact form.</p>
 
 <h2 id="cookies-and-consent">Cookies and consent</h2>
 <p>Cookies are necessary for this website to function properly, for performance measurement,
@@ -33,8 +33,8 @@ declining doesn't prevent you from browsing the site, though your choice is only
 one day before we ask again.</p>
 
 <h2 id="intellectual-property">Intellectual property</h2>
-<p>All content on this site — articles, graphics, the Star Media Group name and mark — is owned
-by or licensed to Star Media Group Berhad and may not be reproduced without permission.</p>
+<p>All content on this site, including articles, graphics, and the Star Media Group name and mark,
+is owned by or licensed to Star Media Group Berhad and may not be reproduced without permission.</p>
 
 <h2 id="liability">Liability</h2>
 <p>This site is provided as-is. While we aim for accuracy, we make no warranty that content is

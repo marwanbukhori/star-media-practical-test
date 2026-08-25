@@ -111,17 +111,15 @@ html.js [data-reveal-delay="3"] { transition-delay: 240ms; }
 }
 
 .smg-marquee__item {
-  font-family: var(--smg-font-display);
-  font-weight: 600;
-  font-size: 20px;
-  color: var(--smg-on-ink);
-  white-space: nowrap;
-  opacity: 0.85;
-  transition: opacity 120ms ease, color 120ms ease;
+  display: block;
+  height: 34px;
+  width: auto;
+  flex-shrink: 0;
+  opacity: 0.8;
+  transition: opacity 120ms ease;
 }
 
 .smg-marquee__item:hover {
-  color: var(--smg-paper);
   opacity: 1;
 }
 
@@ -156,18 +154,44 @@ html.js [data-reveal-delay="3"] { transition-delay: 240ms; }
   position: relative;
   aspect-ratio: 16 / 8;
   overflow: hidden;
-  background: var(--smg-newsprint);
   border: 1px solid var(--smg-rule);
 }
 
-.smg-carousel__panel img {
+.smg-carousel__index {
+  font-family: var(--smg-font-mono);
+  font-weight: 500;
+  font-size: var(--smg-text-eyebrow);
+  letter-spacing: var(--smg-track-eyebrow);
+  color: var(--smg-red);
+  margin: 0 0 8px;
+}
+
+.smg-carousel__caption h3 {
+  font-size: 25px;
+  margin: 0 0 8px;
+}
+
+.smg-carousel__caption p:not(.smg-carousel__index) {
+  font-size: 14.5px;
+  line-height: 1.6;
+  max-width: 40em;
+  margin: 0;
+}
+
+/* Photo panels: full-bleed image, dark gradient scrim, caption overlaid in white */
+
+.smg-carousel__panel--photo {
+  background: var(--smg-newsprint);
+}
+
+.smg-carousel__panel--photo img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
 }
 
-.smg-carousel__caption {
+.smg-carousel__panel--photo .smg-carousel__caption {
   position: absolute;
   left: 0;
   right: 0;
@@ -181,27 +205,55 @@ html.js [data-reveal-delay="3"] { transition-delay: 240ms; }
   );
 }
 
-.smg-carousel__index {
-  font-family: var(--smg-font-mono);
-  font-weight: 500;
-  font-size: var(--smg-text-eyebrow);
-  letter-spacing: var(--smg-track-eyebrow);
-  color: var(--smg-red);
-  margin: 0 0 8px;
-}
-
-.smg-carousel__caption h3 {
+.smg-carousel__panel--photo .smg-carousel__caption h3 {
   color: var(--smg-paper);
-  font-size: 25px;
-  margin: 0 0 8px;
 }
 
-.smg-carousel__caption p:not(.smg-carousel__index) {
-  font-size: 14.5px;
-  line-height: 1.6;
+.smg-carousel__panel--photo .smg-carousel__caption p:not(.smg-carousel__index) {
   color: var(--smg-on-ink);
-  max-width: 40em;
-  margin: 0;
+}
+
+/* Logo panels: light background, logo contained and centered, caption below in ink */
+
+.smg-carousel__panel--logo {
+  background: var(--smg-paper);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 32px;
+}
+
+.smg-carousel__panel--logo .smg-carousel__media {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  max-height: 55%;
+  width: 100%;
+}
+
+.smg-carousel__panel--logo .smg-carousel__media img {
+  max-height: 100%;
+  max-width: 260px;
+  width: auto;
+  object-fit: contain;
+}
+
+.smg-carousel__panel--logo .smg-carousel__caption {
+  margin-top: 20px;
+  max-width: 36em;
+}
+
+.smg-carousel__panel--logo .smg-carousel__caption h3 {
+  color: var(--smg-ink);
+}
+
+.smg-carousel__panel--logo .smg-carousel__caption p:not(.smg-carousel__index) {
+  color: var(--smg-slate);
+  margin-inline: auto;
 }
 
 .smg-carousel__controls {

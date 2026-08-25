@@ -22,9 +22,9 @@ ob_start();
 <p>We collect information in two ways: directly, when you submit the contact form, and
 automatically, through your use of this site.</p>
 <ul>
-  <li>Contact details you provide — full name, email address, and the content of your message.</li>
-  <li>Technical data — your IP address, browser user agent, and cookie identifiers.</li>
-  <li>Consent records — a randomly generated identifier (GUID), the date and time you accepted
+  <li>Contact details you provide: full name, email address, and the content of your message.</li>
+  <li>Technical data: your IP address, browser user agent, and cookie identifiers.</li>
+  <li>Consent records: a randomly generated identifier (GUID), the date and time you accepted
     or declined cookies, and the notice version you responded to.</li>
 </ul>
 
@@ -43,7 +43,7 @@ enquiry and meet any applicable record-keeping obligations.</p>
 
 <h2 id="sharing-and-transfers">Sharing and transfers</h2>
 <p>We do not sell personal data. We share it only with service providers who help us operate
-this site — such as our hosting and email delivery providers — under obligations to protect it.
+this site, such as our hosting and email delivery providers, under obligations to protect it.
 Data is processed within Malaysia unless you're told otherwise.</p>
 
 <h2 id="your-rights">Your rights</h2>
