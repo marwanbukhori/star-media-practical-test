@@ -35,23 +35,9 @@
 }
 
 .smg-logo__mark {
-  width: 28px;
-  height: 28px;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  background: var(--smg-red);
-  color: var(--smg-paper);
-  font-size: 15px;
-  line-height: 1;
-  border-radius: var(--smg-radius);
-}
-
-.smg-logo__text {
-  font-family: var(--smg-font-display);
-  font-weight: 700;
-  font-size: 18px;
-  color: var(--smg-paper);
+  height: 40px;
+  width: auto;
+  display: block;
 }
 
 .smg-nav {
@@ -923,16 +909,10 @@
   margin-bottom: 24px;
 }
 
-.smg-admin-login__brand-mark {
-  width: 26px;
-  height: 26px;
-  flex-shrink: 0;
-  display: grid;
-  place-items: center;
-  background: var(--smg-red);
-  color: var(--smg-paper);
-  font-size: 14px;
-  border-radius: var(--smg-radius);
+.smg-admin-login__brand-logo {
+  height: 32px;
+  width: auto;
+  display: block;
 }
 
 .smg-admin-login__brand-text {
@@ -940,10 +920,6 @@
   font-weight: 600;
   font-size: 16px;
   color: var(--smg-paper);
-}
-
-.smg-admin-login__brand-text--dark {
-  color: var(--smg-ink);
 }
 
 /* ---------- Admin: login ---------- */

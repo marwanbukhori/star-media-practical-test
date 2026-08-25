@@ -1,0 +1,410 @@
+/* Star Media Group — home.css. Homepage-only spectacle: hero photo, stats strip,
+   brand marquee, platform/recognition carousels, about teaser, scroll-reveal.
+   Loaded after site.css, on index.php only. Token-only, no invented colors. */
+
+/* ---------- Scroll-reveal (progressive enhancement) ---------- */
+/* Content is visible by default. Only animates once html.js is present, which
+   the inline bootstrap script in index.php's <head> adds — so JS-off visitors
+   never have content hidden behind a script that didn't run. */
+
+html.js [data-reveal] {
+  opacity: 0;
+  transform: translateY(18px);
+  transition: opacity 600ms ease, transform 600ms ease;
+}
+
+html.js [data-reveal].is-revealed {
+  opacity: 1;
+  transform: none;
+}
+
+html.js [data-reveal-delay="1"] { transition-delay: 80ms; }
+html.js [data-reveal-delay="2"] { transition-delay: 160ms; }
+html.js [data-reveal-delay="3"] { transition-delay: 240ms; }
+
+/* ---------- Hero: photo column ---------- */
+
+.smg-hero__photo {
+  position: relative;
+  aspect-ratio: 4 / 5;
+  border: 1px solid var(--smg-rule);
+  box-shadow: var(--smg-shadow-card);
+  background: var(--smg-newsprint);
+  overflow: hidden;
+}
+
+.smg-hero__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.smg-badge {
+  position: absolute;
+  left: 16px;
+  bottom: 16px;
+  background: var(--smg-paper);
+  border: 1px solid var(--smg-rule);
+  box-shadow: var(--smg-shadow-card);
+  padding: 8px 14px;
+  font-family: var(--smg-font-mono);
+  font-weight: 500;
+  font-size: var(--smg-text-eyebrow);
+  letter-spacing: var(--smg-track-eyebrow);
+  text-transform: uppercase;
+  color: var(--smg-red);
+}
+
+/* ---------- Stats strip (below hero, full width) ---------- */
+
+.smg-stats-strip {
+  background: var(--smg-paper);
+  border-bottom: 1px solid var(--smg-rule);
+}
+
+.smg-stats-strip__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  padding-block: 32px;
+}
+
+.smg-stats-strip .smg-stat {
+  text-align: center;
+  padding: 0 16px;
+  border-left: 1px solid var(--smg-rule);
+}
+
+.smg-stats-strip .smg-stat:first-child {
+  border-left: 0;
+}
+
+/* ---------- Brand marquee ---------- */
+
+.smg-marquee {
+  background: var(--smg-ink);
+  padding: 28px 0;
+  overflow: hidden;
+}
+
+.smg-marquee__label {
+  max-width: var(--smg-container);
+  margin-inline: auto;
+  padding-inline: var(--smg-gutter);
+  margin-bottom: 16px;
+}
+
+.smg-marquee__viewport {
+  overflow: hidden;
+}
+
+.smg-marquee__track {
+  display: flex;
+  align-items: center;
+  gap: 56px;
+  width: max-content;
+  animation: smg-marquee-scroll 36s linear infinite;
+}
+
+.smg-marquee__viewport:hover .smg-marquee__track {
+  animation-play-state: paused;
+}
+
+.smg-marquee__item {
+  font-family: var(--smg-font-display);
+  font-weight: 600;
+  font-size: 20px;
+  color: var(--smg-on-ink);
+  white-space: nowrap;
+  opacity: 0.85;
+  transition: opacity 120ms ease, color 120ms ease;
+}
+
+.smg-marquee__item:hover {
+  color: var(--smg-paper);
+  opacity: 1;
+}
+
+@keyframes smg-marquee-scroll {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+/* ---------- Carousel (platforms + recognition) ---------- */
+
+.smg-carousel {
+  position: relative;
+}
+
+.smg-carousel__track {
+  display: flex;
+  gap: 14px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+
+.smg-carousel__track::-webkit-scrollbar {
+  display: none;
+}
+
+.smg-carousel__panel {
+  flex: 0 0 100%;
+  scroll-snap-align: start;
+  position: relative;
+  aspect-ratio: 16 / 8;
+  overflow: hidden;
+  background: var(--smg-newsprint);
+  border: 1px solid var(--smg-rule);
+}
+
+.smg-carousel__panel img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.smg-carousel__caption {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 40px 32px 26px;
+  color: var(--smg-paper);
+  background: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--smg-ink) 92%, transparent),
+    transparent 75%
+  );
+}
+
+.smg-carousel__index {
+  font-family: var(--smg-font-mono);
+  font-weight: 500;
+  font-size: var(--smg-text-eyebrow);
+  letter-spacing: var(--smg-track-eyebrow);
+  color: var(--smg-red);
+  margin: 0 0 8px;
+}
+
+.smg-carousel__caption h3 {
+  color: var(--smg-paper);
+  font-size: 25px;
+  margin: 0 0 8px;
+}
+
+.smg-carousel__caption p:not(.smg-carousel__index) {
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--smg-on-ink);
+  max-width: 40em;
+  margin: 0;
+}
+
+.smg-carousel__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  margin-top: 18px;
+}
+
+.smg-carousel__arrow {
+  width: 40px;
+  height: 40px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--smg-rule);
+  background: var(--smg-paper);
+  border-radius: var(--smg-radius);
+  cursor: pointer;
+  color: var(--smg-ink);
+  font-size: 18px;
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+
+.smg-carousel__arrow:hover {
+  background: var(--smg-ink);
+  border-color: var(--smg-ink);
+  color: var(--smg-paper);
+}
+
+.smg-carousel__dots {
+  display: flex;
+  gap: 8px;
+}
+
+.smg-carousel__dot {
+  width: 8px;
+  height: 8px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: var(--smg-rule);
+  cursor: pointer;
+  transition: background-color 120ms ease, transform 120ms ease;
+}
+
+.smg-carousel__dot:hover {
+  background: var(--smg-quiet);
+}
+
+.smg-carousel__dot.is-active {
+  background: var(--smg-red);
+  transform: scale(1.3);
+}
+
+/* ---------- About teaser ---------- */
+
+.smg-about-teaser {
+  background: var(--smg-paper);
+  padding: 70px 0;
+}
+
+.smg-about-teaser__grid {
+  display: grid;
+  grid-template-columns: 0.85fr 1.15fr;
+  gap: 56px;
+  align-items: center;
+}
+
+.smg-about-teaser__photo {
+  position: relative;
+  aspect-ratio: 4 / 3;
+  border: 1px solid var(--smg-rule);
+  box-shadow: var(--smg-shadow-card);
+  background: var(--smg-newsprint);
+  overflow: hidden;
+}
+
+.smg-about-teaser__photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.smg-about-teaser__copy h2 {
+  font-size: var(--smg-text-h2);
+  margin: 0 0 16px;
+}
+
+.smg-about-teaser__copy p {
+  font-size: 16.5px;
+  line-height: 1.68;
+  color: var(--smg-slate);
+  margin: 0 0 16px;
+}
+
+.smg-pull-quote {
+  border-left: 3px solid var(--smg-red);
+  padding-left: 20px;
+  margin: 24px 0;
+}
+
+.smg-pull-quote p {
+  font-family: var(--smg-font-display);
+  font-size: 21px;
+  font-style: italic;
+  color: var(--smg-ink);
+  margin: 0 0 6px;
+}
+
+.smg-pull-quote cite {
+  font-family: var(--smg-font-mono);
+  font-size: 12px;
+  font-style: normal;
+  color: var(--smg-muted);
+}
+
+/* ---------- Recognition section ---------- */
+
+.smg-recognition {
+  background: var(--smg-newsprint);
+  padding: 62px 0;
+}
+
+.smg-recognition .smg-carousel__track {
+  scroll-snap-type: x proximity;
+}
+
+.smg-recognition-card {
+  flex: 0 0 min(420px, 85%);
+  scroll-snap-align: start;
+  background: var(--smg-paper);
+  border: 1px solid var(--smg-rule);
+  box-shadow: var(--smg-shadow-card);
+  padding: 28px 26px;
+}
+
+.smg-recognition-card__value {
+  font-family: var(--smg-font-display);
+  font-weight: 700;
+  font-size: 32px;
+  color: var(--smg-ink);
+  margin: 0 0 8px;
+}
+
+.smg-recognition-card__label {
+  font-size: 15px;
+  line-height: 1.5;
+  color: var(--smg-slate);
+  margin: 0;
+}
+
+.smg-recognition-card__source {
+  display: block;
+  margin-top: 10px;
+  font-family: var(--smg-font-mono);
+  font-size: 11.5px;
+  color: var(--smg-quiet);
+}
+
+/* ---------- Responsive ---------- */
+
+@media (max-width: 899px) {
+  .smg-hero__photo {
+    aspect-ratio: 16 / 10;
+  }
+
+  .smg-about-teaser__grid {
+    grid-template-columns: 1fr;
+  }
+
+  .smg-about-teaser__photo {
+    aspect-ratio: 16 / 10;
+  }
+}
+
+@media (max-width: 599px) {
+  .smg-stats-strip__grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .smg-stats-strip .smg-stat {
+    border-left: 0;
+    border-top: 1px solid var(--smg-rule);
+    padding-top: 16px;
+  }
+
+  .smg-stats-strip .smg-stat:first-child {
+    border-top: 0;
+    padding-top: 0;
+  }
+
+  .smg-carousel__caption {
+    padding: 28px 18px 20px;
+  }
+
+  .smg-carousel__caption h3 {
+    font-size: 21px;
+  }
+
+  .smg-recognition-card {
+    flex-basis: 90%;
+  }
+}

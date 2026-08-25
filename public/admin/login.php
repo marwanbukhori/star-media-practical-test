@@ -43,7 +43,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
   <main class="smg-admin-login">
     <div class="smg-admin-login__card">
       <div class="smg-admin-login__brand">
-        <span class="smg-admin-login__brand-mark" aria-hidden="true">★</span>
+        <img src="../assets/images/smg-logo-on-ink.png" alt="Star Media Group" class="smg-admin-login__brand-logo">
         <span class="smg-admin-login__brand-text">Consent Admin</span>
       </div>
       <h2>Sign in</h2>

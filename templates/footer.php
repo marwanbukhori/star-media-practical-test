@@ -6,7 +6,7 @@ $year = date('Y');
 ?>
 <footer class="smg-footer" <?php echo $consentGateOpen ? 'inert' : ''; ?>>
   <div class="smg-footer__inner smg-container">
-    <p class="smg-footer__copy">&copy; <?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8'); ?> Star Media Group Berhad. All rights reserved.</p>
+    <p class="smg-footer__copy">&copy; <?php echo htmlspecialchars($year, ENT_QUOTES, 'UTF-8'); ?> Star Media Group Berhad (Reg. No. 197101000523 (10894-D)). All rights reserved.</p>
     <nav class="smg-footer__links" aria-label="Legal">
       <a href="privacy.php">Privacy Policy</a>
       <a href="terms.php">Terms &amp; Conditions</a>

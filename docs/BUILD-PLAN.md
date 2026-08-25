@@ -116,3 +116,28 @@ ideas), see `docs/ROADMAP.md`.
       for a cloner) and used an SSH clone URL (assumes the reviewer's own SSH key access) —
       both corrected. git init/commits happened incrementally per step rather than one final
       commit, per your direction.
+- [x] Post-submission — homepage revamp (bonus, beyond the graded core). Real photos, animation,
+      and a moving carousel on `index.php` only; the other 3 pages and admin stay unchanged.
+      **Content sourcing**: fetched `starmediagroup.my` directly rather than inventing facts —
+      real founding year (1971, from company registration 197101000523 (10894-D), giving an
+      accurate "55 years" instead of my earlier guessed "54"), real portfolio of ~17 actual
+      brands/platforms for the "family of brands" marquee (not third-party logos, which would
+      have falsely implied a partnership that doesn't exist — their own corporate page confirms
+      no partners are publicly listed), and the real Reuters Institute Digital News Report 2025
+      recognition used as credibility content instead of a fabricated testimonial.
+      **Assets**: real SMG logo (`smg-logo.png`, user-supplied) replaces the ★ text-glyph
+      everywhere. Generated a second variant (`smg-logo-on-ink.png`) via a one-off GD script
+      recoloring the gray "MEDIA GROUP" wordmark — sampled its actual color and measured ~3.2:1
+      contrast against the dark header, below WCAG AA; the derived variant fixes this. Caught and
+      fixed a real pre-existing bug in the same pass: the admin topbar's "Consent Admin" label
+      was dark-on-dark (invisible) due to a wrongly-applied CSS modifier from step 5.
+      **Architecture**: new `home.css`/`home.js`, loaded only on `index.php`. Every interactive
+      piece degrades with JS off — carousels are native CSS scroll-snap (dots/arrows are
+      JS-injected on top, never present-but-broken in raw HTML — verified via curl), scroll-reveal
+      defaults to fully visible (only hidden once an inline script adds `html.js`, which never
+      runs without JS), stat count-up reads its real final value from the server-rendered HTML.
+      Verified live: carousel navigation (arrow clicks move the track and update the active dot),
+      auto-advancing recognition carousel, marquee, count-up, reveal animations, mobile stacking
+      at 375px, zero horizontal overflow, zero console errors, and the full no-JS HTML via curl.
+      Hero/platform/about photos are wired to check for the file and render nothing if absent
+      (`smg_asset_or_placeholder()`) — pending real photo files.

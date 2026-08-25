@@ -17,8 +17,7 @@ $navItems = [
 <header class="smg-header<?php echo $activePage === 'home' ? ' smg-header--sticky' : ''; ?>" <?php echo $consentGateOpen ? 'inert' : ''; ?>>
   <div class="smg-header__inner smg-container">
     <a class="smg-logo" href="index.php">
-      <span class="smg-logo__mark" aria-hidden="true">★</span>
-      <span class="smg-logo__text">Star Media Group</span>
+      <img src="assets/images/smg-logo-on-ink.png" alt="Star Media Group" class="smg-logo__mark">
     </a>
 
     <input type="checkbox" id="smg-nav-toggle" class="smg-nav-toggle">

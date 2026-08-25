@@ -78,7 +78,9 @@ real production handoff.
   admin access — a real subject-rights nicety.
 - **Admin audit log** — who exported what, who logged in when, beyond just `last_login_at`.
 - **Multi-admin roles** (viewer vs. exporter vs. superadmin) once there's more than one admin user.
-- **Real Star Media Group brand assets** (actual logo SVG) in place of the ★ text-glyph placeholder.
+- ~~Real Star Media Group brand assets in place of the ★ text-glyph placeholder~~ — **done**,
+  see `docs/BUILD-PLAN.md`'s homepage-revamp entry. The real logo now replaces the ★ everywhere,
+  and the homepage got real photos, animation, and a carousel (bonus, beyond the graded core).
 
 ### Security / compliance
 - **Structured audit logging** of consent state transitions (currently just the DB row; a

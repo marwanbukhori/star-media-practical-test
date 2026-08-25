@@ -5,9 +5,9 @@ A practical-test deliverable: a 4-page website (Home/Overview, About-Contact, Pr
 Terms & Conditions) in **PHP 8 + MySQL 8**, with a blocking first-visit cookie-consent gate
 recorded to both a cookie and the database, plus an optional secured admin portal.
 
-Requirements: `design_handoff_smg_consent_site/Practical Test - S. Web Developer.pdf`
-Design + full spec: `design_handoff_smg_consent_site/README.md` — **read it before writing UI.**
-Visual reference: `design_handoff_smg_consent_site/Star Theme Kit.dc.html` (open in a browser).
+Requirements: `docs/handoff/Practical Test - S. Web Developer.pdf` (gitignored — local reference only).
+Design + full spec: `docs/handoff/README.md` — **read it before writing UI.**
+Visual reference: `docs/handoff/Star Theme Kit.dc.html` (open in a browser).
 
 ## Stack rules
 - PHP 8.2+, no framework, no Composer dependency unless asked. PDO for MySQL.
@@ -19,9 +19,19 @@ Visual reference: `design_handoff_smg_consent_site/Star Theme Kit.dc.html` (open
 ## Design rules
 - Red (`--smg-red`) is a signal: max one red element per viewport on content pages.
   The consent dialog is the one exception.
-- Square print aesthetic: `--smg-radius` (2px) on controls, 0 on cards. No gradients. No emoji.
+- Square print aesthetic: `--smg-radius` (2px) on controls, 0 on cards. No emoji.
 - Source Serif 4 for headings, IBM Plex Sans for body, IBM Plex Mono for eyebrows/metadata/GUIDs.
 - Mobile: 44px minimum hit target, 48px on the consent buttons.
+- **Photos and gradients are allowed on the homepage** (index.php) as of the homepage revamp —
+  the original "no images/no gradients" rule came from the Star Theme Kit design handoff, which
+  is a creative reference, not the actual graded requirement (the requirements PDF has no visual
+  constraints at all). Real photos require actual image files (never fabricated/stock-implied as
+  if real); real logos of third parties are never used to imply a partnership that doesn't exist
+  — see `docs/BUILD-PLAN.md`'s homepage-revamp entry for how the brand marquee is sourced (Star
+  Media Group's own real portfolio, not third-party trademarks). Gradients are functional only
+  (e.g. a scrim behind photo captions for text legibility), built from `var(--smg-*)` tokens via
+  `color-mix()`, not new arbitrary colors. The other 3 pages (about/privacy/terms) and the admin
+  portal stay within the original no-photo, token-only system.
 
 ## Consent rules (the graded core — do not improvise)
 - `CONSENT_VERSION = 1`, one constant. Dialog reappears if the cookie's version is lower.

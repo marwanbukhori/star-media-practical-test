@@ -95,8 +95,8 @@ function smg_page_url(int $page, string $q): string
   <header class="smg-admin-topbar">
     <div class="smg-admin-topbar__inner">
       <div class="smg-admin-login__brand">
-        <span class="smg-admin-login__brand-mark" aria-hidden="true">★</span>
-        <span class="smg-admin-login__brand-text smg-admin-login__brand-text--dark">Consent Admin</span>
+        <img src="../assets/images/smg-logo-on-ink.png" alt="Star Media Group" class="smg-admin-login__brand-logo">
+        <span class="smg-admin-login__brand-text">Consent Admin</span>
       </div>
       <div class="smg-admin-topbar__actions">
         <span class="smg-admin-topbar__user"><?php echo htmlspecialchars((string) Auth::currentUsername(), ENT_QUOTES, 'UTF-8'); ?></span>
