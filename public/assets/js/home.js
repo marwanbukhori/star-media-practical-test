@@ -66,7 +66,9 @@
 
     function scrollToPanel(i) {
       var clamped = Math.max(0, Math.min(panels.length - 1, i));
-      panels[clamped].scrollIntoView({ behavior: reducedMotion ? 'auto' : 'smooth', inline: 'start', block: 'nearest' });
+      // Scroll the track itself (horizontal only) — never scrollIntoView, which scrolls
+      // the whole page vertically too when the carousel isn't already in the viewport.
+      track.scrollTo({ left: panels[clamped].offsetLeft, behavior: reducedMotion ? 'auto' : 'smooth' });
     }
 
     prevBtn.addEventListener('click', function () {
@@ -181,20 +183,41 @@
         }
       });
       var next = (current + 1) % panels.length;
-      panels[next].scrollIntoView({ behavior: 'smooth', inline: 'start', block: 'nearest' });
+      // Scroll the track itself (horizontal only) — never scrollIntoView, which would
+      // also scroll the whole page down to this section if it isn't visible yet.
+      recognitionTrack.scrollTo({ left: panels[next].offsetLeft, behavior: 'smooth' });
     }
 
     function start() {
-      autoTimer = setInterval(nextPanel, 5000);
+      if (!autoTimer) autoTimer = setInterval(nextPanel, 5000);
     }
     function stop() {
       clearInterval(autoTimer);
+      autoTimer = null;
     }
 
-    start();
     recognitionTrack.addEventListener('mouseenter', stop);
     recognitionTrack.addEventListener('mouseleave', start);
     recognitionTrack.addEventListener('focusin', stop);
     recognitionTrack.addEventListener('focusout', start);
+
+    // Only auto-advance while the carousel is actually on screen.
+    if ('IntersectionObserver' in window) {
+      var visibilityObserver = new IntersectionObserver(
+        function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) {
+              start();
+            } else {
+              stop();
+            }
+          });
+        },
+        { threshold: 0.4 }
+      );
+      visibilityObserver.observe(recognitionTrack);
+    } else {
+      start();
+    }
   }
 })();
