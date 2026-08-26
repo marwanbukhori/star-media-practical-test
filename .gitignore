@@ -11,3 +11,11 @@
 
 # Browser-automation debug output from manual verification passes.
 .playwright-mcp/
+
+# Test tooling — installed via `composer install` / `npm install`, not committed.
+/vendor/
+/node_modules/
+/tests/e2e/node_modules/
+/.phpunit.cache/
+/playwright-report/
+/test-results/

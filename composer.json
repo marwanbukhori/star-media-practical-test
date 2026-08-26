@@ -1,0 +1,26 @@
+{
+    "name": "starmediagroup/consent-site",
+    "description": "Star Media Group consent site — practical test. Composer is dev-only (tests); the app itself has no runtime dependencies.",
+    "type": "project",
+    "license": "proprietary",
+    "require": {
+        "php": ">=8.2"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Smg\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Smg\\Tests\\": "tests/Unit/",
+            "Smg\\Tests\\Integration\\": "tests/Integration/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
