@@ -95,10 +95,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
           <span data-smg-btn-label>Sign in</span>
         </button>
       </form>
-
-      <p class="smg-admin-login__notes">
-        password_verify() + session regenerate on login · CSRF token on this form · rate limited to 5 attempts/min
-      </p>
     </div>
   </main>
   <script src="../assets/js/admin.js" defer></script>
