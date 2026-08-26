@@ -628,6 +628,7 @@
 
 .smg-field input[type="text"],
 .smg-field input[type="email"],
+.smg-field input[type="password"],
 .smg-field select,
 .smg-field textarea {
   font-family: var(--smg-font-ui);
