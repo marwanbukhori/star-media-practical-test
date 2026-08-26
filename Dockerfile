@@ -1,7 +1,9 @@
 FROM php:8.2-apache
 
 RUN docker-php-ext-install pdo_mysql \
-    && a2enmod rewrite
+    && a2enmod rewrite \
+    && (a2dismod mpm_event mpm_worker || true) \
+    && a2enmod mpm_prefork
 
 # Serve public/ directly, matching `php -S localhost:8000 -t public` in local dev.
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
