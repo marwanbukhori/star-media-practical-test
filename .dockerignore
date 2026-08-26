@@ -1,0 +1,14 @@
+.git
+.DS_Store
+*.log
+
+config.php
+docs/handoff/
+PROMPTS.md
+
+vendor/
+node_modules/
+tests/e2e/node_modules/
+.phpunit.cache/
+tests/e2e/test-results/
+tests/e2e/playwright-report/

@@ -149,6 +149,53 @@ suite must always own its server, never adopt whatever else happens to be listen
 
 ---
 
+## v1.4 — Docker + Railway deployment plan
+
+Scoped from a follow-up request on 2026-08-26: containerize the app and prepare it for a real
+deployment (Railway, chosen for its free tier). Split into two pieces — the Docker setup itself,
+which is built and verified, and the deployment runbook, which is documentation only (no
+Railway account access from here to actually deploy).
+
+- [x] **`Dockerfile`** (`php:8.2-apache`) — `pdo_mysql` installed, `DocumentRoot` pointed at
+      `public/` (matching `php -S localhost:8000 -t public` exactly). `docker/entrypoint.sh`
+      rewrites Apache's listen port from Railway's dynamic `$PORT` at container start — a fixed
+      port 80 would fail Railway's healthcheck, since it assigns the port at random.
+- [x] **`docker-compose.yml`** — `app` (builds the Dockerfile, code mounted as a volume) +
+      `db` (`mysql:8`, `db/schema.sql` auto-imported via `/docker-entrypoint-initdb.d/`). One
+      `docker compose up -d --build` and a reviewer needs zero local PHP/MySQL installs.
+- [x] **`src/Config.php` environment-variable config path** — when `MYSQLHOST` is set (Railway's
+      MySQL plugin sets it automatically; `docker-compose.yml`'s `app` service sets the same
+      name pointing at its `db` service), the whole config is built from env vars and
+      `config.php` is never read — real secrets never get baked into the image. Local dev via
+      `php -S` is completely unaffected: without `MYSQLHOST` set, `Config::get()` falls back to
+      `config.php` exactly as before.
+- [x] **`Consent::isSecureContext()` extended for reverse-proxy HTTPS detection** — Railway
+      terminates TLS at its edge and forwards to the container over plain HTTP, so
+      `$_SERVER['HTTPS']` never reflects a real HTTPS visitor there; added a check for the
+      `X-Forwarded-Proto: https` header the edge proxy sets. Deliberately *not* a blanket "force
+      HTTPS whenever the env-based config path is active" — docker-compose's local `app` service
+      uses that same env-based path but is plain HTTP with no proxy, so that blanket rule would
+      have silently broken cookies in local Docker testing while looking correct on paper.
+- [x] **`docs/DEPLOYMENT.md`** — Railway runbook: create the project + MySQL plugin, link env
+      vars, import `db/schema.sql` (not auto-imported the way docker-compose does it), seed an
+      admin user via `railway run`, optional env vars for mail/admin/timezone settings, and a
+      documented limitation that `mail()` needs a local MTA this image doesn't ship, so contact
+      form submissions persist to the DB but no notification email actually sends until that's
+      wired up (tracked as its own `v1.1+` idea below, not silently patched over).
+
+**Verified live** (2026-08-26): `docker compose up -d --build` — image built, `db/schema.sql`
+auto-imported, both containers healthy. Through the containerized app: consent accept (cookie
+set, `consent_log` row written, no `Secure` flag over plain local HTTP as expected), the
+`X-Forwarded-Proto: https` header forcing the `Secure` flag on (simulating Railway's edge proxy,
+confirming the fix actually works before ever touching a real Railway deploy), `bin/seed-admin.php`
+via `docker compose exec`, admin login (303 → dashboard), and a full contact-form submission
+persisting to `contact_messages`. Actual Railway deployment itself is out of scope here (no
+account access from this session, and any Railway account used for this project must be
+marwanbukhori's own personal account, never an employer's) — `docs/DEPLOYMENT.md` is the plan
+for whenever that happens.
+
+---
+
 ## v1.1+ — post-submission enhancements
 
 Grouped by category. None of these block v1.0; they're what I'd propose next if this became a
@@ -166,11 +213,11 @@ real production handoff.
 ### CI / DevEx
 - **GitHub Actions pipeline**: `php -l` across all files, PHPUnit, PHP_CodeSniffer (PSR-12),
   and optionally PHPStan/Psalm for static analysis — currently all of this is done by hand per step.
-- **Dockerfile + docker-compose** (PHP 8.2 + MySQL 8) so a reviewer doesn't need Homebrew/local
-  installs to run it — trades away "no build step" but only for local dev convenience, the
-  deployed app stays build-step-free.
+- ~~Dockerfile + docker-compose~~ — **done**, see the v1.4 section below.
 - **Database migrations (e.g. Phinx)** instead of one `schema.sql`, so schema changes have a
   history instead of hand-editing the file (as I did adding `login_attempts`/`contact_messages`).
+  Still relevant even with Docker in place — `docs/DEPLOYMENT.md` documents applying schema
+  changes to Railway by hand for exactly this reason.
 
 ### Features
 - **Cookie preference granularity** (necessary / performance / marketing categories) instead of

@@ -39,9 +39,21 @@ php -S localhost:8000 -t public
 ```
 Visit `http://localhost:8000`.
 
+## Run with Docker
+No local PHP or MySQL install needed — one command builds the app image (`php:8.2-apache`)
+and a MySQL 8 container, importing `db/schema.sql` automatically on first run:
+```bash
+docker compose up -d --build
+```
+Visit `http://localhost:8000`. `config.php` is never read in this path — the app gets its DB
+credentials from environment variables set in `docker-compose.yml` (see `src/Config.php`; this
+is the same mechanism Railway uses in production, see `docs/DEPLOYMENT.md`).
+
 ## Create an admin user
 ```bash
 php bin/seed-admin.php
+# or, running under Docker:
+docker compose exec app php bin/seed-admin.php
 ```
 Prompts for a username and password (min. 8 characters) and inserts the bcrypt hash into
 `admin_users`. Then sign in at `http://localhost:8000/admin/login.php`.
@@ -66,6 +78,8 @@ templates/              bootstrap.php  admin-bootstrap.php  header.php  footer.p
 db/                     schema.sql
 bin/                    seed-admin.php
 tests/                  Unit/  Integration/  (PHPUnit)  e2e/  (Playwright)
+docker/                 entrypoint.sh
+Dockerfile  docker-compose.yml  .dockerignore
 config.example.php  .gitignore  README.md
 ```
 

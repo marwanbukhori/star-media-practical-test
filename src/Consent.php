@@ -221,7 +221,15 @@ final class Consent
             return (bool) $forced;
         }
 
-        return !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off';
+        if (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') {
+            return true;
+        }
+
+        // Railway (and most PaaS reverse proxies) terminates TLS at the edge and forwards to
+        // the container over plain HTTP, so $_SERVER['HTTPS'] is never set even for a real
+        // HTTPS visitor — the proxy's own header is the only signal. Only trust it when a
+        // proxy is actually in front (this app has no other reverse-proxy deployment target).
+        return ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https';
     }
 
     // ---------------------------------------------------------------- persistence
