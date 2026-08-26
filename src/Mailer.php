@@ -47,12 +47,10 @@ final class Mailer
             // one. The submission itself still gets persisted to contact_messages regardless
             // (see about.php), so nothing is lost, but nobody gets notified unless someone is
             // watching the logs — surface it loudly rather than only in a DB column an admin
-            // would have to think to check.
-            error_log(sprintf(
-                'Mailer::sendContactMessage failed to send (no MTA configured?) — from %s, subject "%s"',
-                $safeEmail,
-                $subjectLabel
-            ));
+            // would have to think to check. Deliberately no email/name here: that's already in
+            // contact_messages under the app's normal access controls, and a plain server log
+            // is the wrong place to also carry a submitter's PII.
+            error_log(sprintf('Mailer::sendContactMessage failed to send (no MTA configured?) — subject "%s"', $subjectLabel));
         }
 
         return $sent;
