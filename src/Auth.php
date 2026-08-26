@@ -80,7 +80,7 @@ final class Auth
         session_destroy();
     }
 
-    private static function isRateLimited(): bool
+    public static function isRateLimited(): bool
     {
         $config = self::config();
         $limit = (int) ($config['admin']['login_rate_limit'] ?? 5);
@@ -96,6 +96,30 @@ final class Auth
         $row = $stmt->fetch();
 
         return ((int) $row['attempts']) >= $limit;
+    }
+
+    /** Seconds until the oldest attempt in the current rate-limit window ages out. */
+    public static function retryAfterSeconds(): int
+    {
+        $pdo = Db::connection();
+        $stmt = $pdo->prepare(
+            'SELECT MIN(attempted_at) AS oldest FROM login_attempts
+             WHERE ip_address = INET6_ATON(:ip) AND attempted_at >= (UTC_TIMESTAMP() - INTERVAL :window SECOND)'
+        );
+        $stmt->bindValue(':ip', $_SERVER['REMOTE_ADDR'] ?? '');
+        $stmt->bindValue(':window', self::RATE_LIMIT_WINDOW_SECONDS, PDO::PARAM_INT);
+        $stmt->execute();
+        $row = $stmt->fetch();
+
+        if (!$row || $row['oldest'] === null) {
+            return 0;
+        }
+
+        $oldest = new DateTimeImmutable($row['oldest'], new DateTimeZone('UTC'));
+        $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
+        $elapsed = $now->getTimestamp() - $oldest->getTimestamp();
+
+        return max(0, self::RATE_LIMIT_WINDOW_SECONDS - $elapsed);
     }
 
     private static function recordAttempt(string $username, bool $succeeded): void

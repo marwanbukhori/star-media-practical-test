@@ -90,6 +90,7 @@ function smg_page_url(int $page, string $q): string
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="../assets/css/tokens.css">
   <link rel="stylesheet" href="../assets/css/site.css">
+  <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
 <body class="smg-admin-page">
   <header class="smg-admin-topbar">

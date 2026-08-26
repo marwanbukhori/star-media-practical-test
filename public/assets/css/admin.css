@@ -1,0 +1,85 @@
+/* Star Media Group — admin.css. Admin portal only (login + dashboard). Token-only. */
+
+/* ---------- Login: background photo + entrance animation ---------- */
+
+.smg-admin-login {
+  position: relative;
+  background-image:
+    linear-gradient(
+      color-mix(in srgb, var(--smg-ink) 88%, transparent),
+      color-mix(in srgb, var(--smg-ink) 88%, transparent)
+    ),
+    url("../images/hero.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+.smg-admin-login__card {
+  animation: smg-rise-in 500ms var(--smg-ease);
+}
+
+/* ---------- Password field: show/hide toggle ---------- */
+
+.smg-password-field {
+  position: relative;
+  display: flex;
+}
+
+.smg-password-field input {
+  flex: 1;
+  width: 100%;
+  padding-right: 44px;
+}
+
+.smg-password-toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border: 0;
+  color: var(--smg-on-ink);
+  cursor: pointer;
+}
+
+.smg-password-toggle:hover {
+  color: var(--smg-paper);
+}
+
+/* ---------- Field error state (dark fields) ---------- */
+
+.smg-field--dark.has-error input[type="text"],
+.smg-field--dark.has-error input[type="password"] {
+  border: 1.5px solid var(--smg-red);
+  background: color-mix(in srgb, var(--smg-red) 12%, var(--smg-ink-soft));
+}
+
+/* ---------- Submit button loading state ---------- */
+
+.smg-btn.is-loading {
+  position: relative;
+  color: transparent !important;
+  pointer-events: none;
+}
+
+.smg-btn.is-loading::after {
+  content: "";
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  top: 50%;
+  left: 50%;
+  margin: -9px 0 0 -9px;
+  border: 2px solid color-mix(in srgb, var(--smg-paper) 40%, transparent);
+  border-top-color: var(--smg-paper);
+  border-radius: 50%;
+  animation: smg-spin 700ms linear infinite;
+}
+
+@keyframes smg-spin {
+  to { transform: rotate(360deg); }
+}
