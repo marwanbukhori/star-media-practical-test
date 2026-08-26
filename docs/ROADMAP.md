@@ -46,20 +46,20 @@ Scoped from a priority pass on 2026-08-25: which admin improvements to build now
 core model); audit log and change-password came off the someday list into this one.
 
 ### Login form
-- [ ] **Show/hide password toggle** — small eye button inside the password field.
-- [ ] **Field-level error feedback** — `has-error` styling (already exists, reused from the
+- [x] **Show/hide password toggle** — small eye button inside the password field.
+- [x] **Field-level error feedback** — `has-error` styling (already exists, reused from the
       contact form) on both fields when credentials are wrong.
-- [ ] **Live rate-limit countdown** — new `Auth::retryAfterSeconds()` computes remaining wait
+- [x] **Live rate-limit countdown** — new `Auth::retryAfterSeconds()` computes remaining wait
       time from the oldest attempt in the current window; login.php distinguishes "wrong
       credentials" from "rate limited" (currently one generic message for both) and JS counts
       the rate-limit message down live.
-- [ ] **Loading state on submit** — button disables + shows a spinner on submit. Still a real
+- [x] **Loading state on submit** — button disables + shows a spinner on submit. Still a real
       form POST underneath (works with JS off, just no spinner) — same pattern as the rest of
       this project's progressive enhancement.
-- [ ] **Entrance animation** — reuses the existing `smg-rise-in` keyframe from the consent
+- [x] **Entrance animation** — reuses the existing `smg-rise-in` keyframe from the consent
       dialog. Unconditional CSS, no scroll-trigger needed (it's above the fold), respects
       `prefers-reduced-motion` via the existing global rule.
-- [ ] **Real background photo** — the real HQ building photo (already in `assets/images/hero.jpg`)
+- [x] **Real background photo** — the real HQ building photo (already in `assets/images/hero.jpg`)
       as a full-bleed background behind the card, with a dark scrim for contrast/legibility.
 
 ### Dashboard features
