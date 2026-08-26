@@ -63,27 +63,27 @@ core model); audit log and change-password came off the someday list into this o
       as a full-bleed background behind the card, with a dark scrim for contrast/legibility.
 
 ### Dashboard features
-- [ ] **Consent record detail page** (`admin/record.php?guid=`) — full record including columns
+- [x] **Consent record detail page** (`admin/record.php?guid=`) — full record including columns
       not shown in the table today (`ip_address`, `user_agent`, `created_at`). Real page, not a
       JS-only modal, so it stays linkable and works without JS. GUID cells in the table become
       links to it.
-- [ ] **Advanced filters** — status (Accepted/Declined/Expired) and a date range, added to the
+- [x] **Advanced filters** — status (Accepted/Declined/Expired) and a date range, added to the
       existing GUID search. Status filtering needs a SQL `CASE`-based WHERE clause since
       "expired" isn't a stored column, just `accepted_at`/`expires_at` compared to now.
       `export.php` honors the same filters as the table.
-- [ ] **Sortable columns** — `?sort=&dir=` on the table headers (Accepted at / Expires / Ver).
+- [x] **Sortable columns** — `?sort=&dir=` on the table headers (Accepted at / Expires / Ver).
       Column name is whitelisted server-side (can't parameterize an identifier in SQL) rather
       than taken directly from the query string.
-- [ ] **Dashboard trend chart** — accepted vs. declined over the last 14 days. Plain CSS bars
+- [x] **Dashboard trend chart** — accepted vs. declined over the last 14 days. Plain CSS bars
       (no charting library, consistent with the project's no-dependency rule), grouped by day
       from a `GROUP BY DATE(accepted_at), action` query.
 
 ### Bigger commitments (real auth/security surface)
-- [ ] **Admin audit log** — new `admin_audit_log` table (admin id, action, detail, IP,
+- [x] **Admin audit log** — new `admin_audit_log` table (admin id, action, detail, IP,
       timestamp). Logged on login, logout, export, and viewing a record's detail page. New
       `src/AuditLog.php` helper (kept separate from `Auth.php`, matching the project's
       one-class-per-concern pattern) and a new `admin/audit.php` viewer, paginated.
-- [ ] **Change-my-password page** (`admin/change-password.php`) — current password
+- [x] **Change-my-password page** (`admin/change-password.php`) — current password
       (`password_verify`), new password + confirm, CSRF-protected, updates
       `admin_users.password_hash`.
 
@@ -91,6 +91,15 @@ New shared file: `public/assets/css/admin.css` (parallel to `home.css`) for all 
 keeping `site.css` from growing further with admin-only styles. Login-form JS (password toggle,
 loading state, countdown) goes in a new `public/assets/js/admin.js`; the dashboard features
 above are all plain server-rendered links/forms, no JS required.
+
+**Verified live** (2026-08-26): all of the above tested end-to-end against 40 seeded
+`consent_log` rows spanning ~13 days — status filter, sort direction (confirmed via actual row
+order, not just UI state), the detail page (including IP address decoding from `VARBINARY` and
+the real `user_agent`), the audit log capturing real login/logout/view_record/change_password
+events, and change-password verified by actually logging back in with the new password
+afterward. Two real bugs found and fixed in the same pass (see `docs/BUILD-PLAN.md`): a MySQL
+session-timezone mismatch, and GUID links inheriting the global red link color across an entire
+20-row column.
 
 ---
 

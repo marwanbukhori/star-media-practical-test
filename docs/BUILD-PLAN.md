@@ -163,3 +163,25 @@ ideas), see `docs/ROADMAP.md`.
       **Copy**: removed every em dash from visible page copy (about/privacy/terms/legal-page too,
       not just the homepage) and rewrote the affected sentences in plainer, more conversational
       language rather than just swapping punctuation.
+- [x] Post-submission — admin portal upgrade (v1.2, see `docs/ROADMAP.md` for the full scoped
+      checklist). Login form: password show/hide toggle, field-level error states, live
+      rate-limit countdown, submit loading spinner, entrance animation, real HQ photo background.
+      Dashboard: `admin/record.php` detail page, status/date-range filters shared between the
+      table and CSV export via a new `src/ConsentQuery.php` (avoids the two drifting out of
+      sync), sortable columns, a 14-day CSS-bar trend chart, `src/AuditLog.php` +
+      `admin/audit.php`, and `admin/change-password.php`.
+      **Two real bugs found and fixed**: (1) MySQL's session `time_zone` defaulted to the
+      server's system zone (UTC+8 here) rather than UTC, so any `TIMESTAMP` column
+      (`login_attempts.attempted_at`, etc.) read back and parsed as UTC was off by the server's
+      offset — surfaced by the new rate-limit countdown showing "28833s" instead of a sane
+      value. Fixed at the root by pinning the PDO connection's session time zone to `+00:00`
+      (version-safe across the PHP 8.4+ `Pdo\Mysql::ATTR_INIT_COMMAND` rename). (2) Assigning
+      `.hidden` on an SVG element didn't reliably work in this environment — the password-toggle
+      button's input-type switch worked but the icon swap silently failed; fixed via
+      `setAttribute`/`removeAttribute('hidden')` instead. Also caught and fixed two design
+      regressions during verification: GUID cells inheriting the global red link color across
+      an entire 20-row column (now ink, red only on hover), and a broken mobile topbar layout
+      once "Audit log"/"Change password" links were added (now stacks instead of wrapping badly).
+      Verified live throughout: real login/failed-login/rate-limit flows, filter+sort+pagination
+      against 40 seeded rows, the record detail page's IP/user-agent decoding, real audit-log
+      capture, and change-password confirmed by logging back in with the new password.
