@@ -2,6 +2,7 @@
 <?php
 declare(strict_types=1);
 
+require __DIR__ . '/../src/Config.php';
 require __DIR__ . '/../src/Db.php';
 
 use Smg\Db;

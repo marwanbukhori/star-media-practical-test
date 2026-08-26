@@ -215,7 +215,7 @@ final class Consent
     /** Whether cookies should get the Secure flag — used for the session cookie too. */
     public static function isSecureContext(): bool
     {
-        $config = self::config();
+        $config = Config::get();
         $forced = $config['app']['force_https'] ?? null;
         if ($forced !== null) {
             return (bool) $forced;
@@ -272,14 +272,4 @@ final class Consent
         );
     }
 
-    /** @return array<string, mixed> */
-    private static function config(): array
-    {
-        static $config = null;
-        if ($config === null) {
-            $config = require dirname(__DIR__) . '/config.php';
-        }
-
-        return $config;
-    }
 }

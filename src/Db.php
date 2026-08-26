@@ -16,8 +16,7 @@ final class Db
             return self::$instance;
         }
 
-        $config = require dirname(__DIR__) . '/config.php';
-        $db = $config['db'];
+        $db = Config::get()['db'];
 
         $dsn = sprintf(
             'mysql:host=%s;port=%d;dbname=%s;charset=%s',

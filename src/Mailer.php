@@ -17,8 +17,7 @@ final class Mailer
 
     public static function sendContactMessage(string $name, string $email, string $subjectKey, string $message): bool
     {
-        $config = require dirname(__DIR__) . '/config.php';
-        $mailConfig = $config['mail'];
+        $mailConfig = Config::get()['mail'];
 
         $safeName = self::sanitizeHeaderValue($name);
         $safeEmail = self::sanitizeHeaderValue($email);

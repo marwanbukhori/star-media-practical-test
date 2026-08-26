@@ -91,7 +91,7 @@ final class Auth
 
     public static function isRateLimited(): bool
     {
-        $config = self::config();
+        $config = Config::get();
         $limit = (int) ($config['admin']['login_rate_limit'] ?? 5);
 
         $pdo = Db::connection();
@@ -144,14 +144,4 @@ final class Auth
         ]);
     }
 
-    /** @return array<string, mixed> */
-    private static function config(): array
-    {
-        static $config = null;
-        if ($config === null) {
-            $config = require dirname(__DIR__) . '/config.php';
-        }
-
-        return $config;
-    }
 }
