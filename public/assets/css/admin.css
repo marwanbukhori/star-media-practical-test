@@ -83,3 +83,280 @@
 @keyframes smg-spin {
   to { transform: rotate(360deg); }
 }
+
+/* ---------- Topbar: change-password link ---------- */
+
+.smg-admin-topbar__user-link {
+  font-size: 13.5px;
+  color: var(--smg-on-ink);
+}
+
+.smg-admin-topbar__user-link:hover {
+  color: var(--smg-paper);
+  text-decoration: underline;
+}
+
+/* ---------- Table controls: filter form (select, date range) ---------- */
+
+.smg-admin-table-card__controls {
+  flex-wrap: wrap;
+  row-gap: 10px;
+}
+
+.smg-admin-table-card__controls select {
+  padding: 9px 10px;
+  font-size: 13.5px;
+  font-family: var(--smg-font-ui);
+  border: 1px solid var(--smg-field);
+  border-radius: var(--smg-radius);
+  background: var(--smg-paper);
+  color: var(--smg-ink);
+}
+
+.smg-admin-table-card__date-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12.5px;
+  color: var(--smg-muted);
+}
+
+.smg-admin-table-card__date-label input[type="date"] {
+  padding: 7px 8px;
+  font-size: 13px;
+  font-family: var(--smg-font-ui);
+  border: 1px solid var(--smg-field);
+  border-radius: var(--smg-radius);
+  color: var(--smg-ink);
+}
+
+.smg-admin-table-card__controls select:focus-visible,
+.smg-admin-table-card__date-label input:focus-visible {
+  outline: none;
+  border-color: var(--smg-red);
+  box-shadow: var(--smg-focus-ring);
+}
+
+/* ---------- Sortable table headers ---------- */
+
+.smg-admin-table-scroll th a {
+  color: inherit;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.smg-admin-table-scroll th a:hover {
+  color: var(--smg-ink);
+  text-decoration: underline;
+}
+
+/* ---------- Trend chart ---------- */
+
+.smg-admin-trend-card {
+  background: var(--smg-paper);
+  border: 1px solid var(--smg-rule);
+  padding: 20px 22px 16px;
+  margin-bottom: 24px;
+}
+
+.smg-admin-trend-card__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.smg-admin-trend-card__head h2 {
+  font-size: 18px;
+  margin: 0;
+}
+
+.smg-admin-trend-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 12.5px;
+  color: var(--smg-muted);
+}
+
+.smg-admin-trend-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.smg-admin-trend-swatch {
+  width: 10px;
+  height: 10px;
+  display: inline-block;
+  border-radius: 2px;
+}
+
+.smg-admin-trend-swatch--accepted {
+  background: var(--smg-accepted);
+}
+
+.smg-admin-trend-swatch--declined {
+  background: var(--smg-declined);
+}
+
+.smg-admin-trend-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  height: 140px;
+}
+
+.smg-admin-trend-bar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+  gap: 8px;
+}
+
+.smg-admin-trend-bar__stack {
+  width: 100%;
+  max-width: 28px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  background: var(--smg-newsprint);
+}
+
+.smg-admin-trend-bar__segment {
+  width: 100%;
+  display: block;
+}
+
+.smg-admin-trend-bar__segment--accepted {
+  background: var(--smg-accepted);
+}
+
+.smg-admin-trend-bar__segment--declined {
+  background: var(--smg-declined);
+}
+
+.smg-admin-trend-bar__label {
+  font-family: var(--smg-font-mono);
+  font-size: 10px;
+  color: var(--smg-muted);
+  white-space: nowrap;
+}
+
+/* ---------- Record detail page ---------- */
+
+.smg-admin-back-link {
+  display: inline-block;
+  margin-bottom: 16px;
+  font-size: 13.5px;
+  color: var(--smg-slate);
+}
+
+.smg-admin-record-card {
+  padding: 24px 26px;
+}
+
+.smg-admin-record-detail {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 14px 20px;
+  margin: 20px 0 0;
+}
+
+.smg-admin-record-detail dt {
+  font-family: var(--smg-font-mono);
+  font-size: 11px;
+  letter-spacing: var(--smg-track-eyebrow);
+  text-transform: uppercase;
+  color: var(--smg-quiet);
+  padding-top: 2px;
+}
+
+.smg-admin-record-detail dd {
+  margin: 0;
+  font-size: 14.5px;
+  color: var(--smg-ink);
+}
+
+.smg-admin-record-detail__wrap {
+  word-break: break-word;
+}
+
+@media (max-width: 599px) {
+  .smg-admin-record-detail {
+    grid-template-columns: 1fr;
+    gap: 4px 0;
+  }
+
+  .smg-admin-record-detail dt {
+    margin-top: 12px;
+  }
+
+  .smg-admin-trend-chart {
+    height: 100px;
+  }
+
+  .smg-admin-trend-bar__label {
+    display: none;
+  }
+}
+
+/* ---------- Narrow card (change password) ---------- */
+
+.smg-admin-narrow-card {
+  max-width: 420px;
+}
+
+.smg-admin-narrow-card .smg-form {
+  display: grid;
+  gap: 16px;
+  margin-top: 20px;
+}
+
+/* ---------- GUID link (record detail) ---------- */
+/* Red is a signal, used sparingly — a whole column of red links would violate that,
+   so the link only turns red on hover/focus instead of resting red. */
+
+.smg-admin-table-guid a {
+  color: var(--smg-ink);
+  text-decoration: none;
+}
+
+.smg-admin-table-guid a:hover,
+.smg-admin-table-guid a:focus-visible {
+  color: var(--smg-red-ink);
+  text-decoration: underline;
+}
+
+/* ---------- Topbar: mobile ---------- */
+
+@media (max-width: 699px) {
+  .smg-admin-topbar__inner {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .smg-admin-topbar__actions {
+    flex-wrap: wrap;
+    width: 100%;
+    row-gap: 8px;
+  }
+
+  .smg-admin-topbar__user {
+    display: none;
+  }
+}
+
+/* ---------- Audit log ---------- */
+
+.smg-admin-audit-detail {
+  font-family: var(--smg-font-mono);
+  font-size: 12px;
+  color: var(--smg-muted);
+}

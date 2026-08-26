@@ -53,3 +53,16 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   created_at       TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
   INDEX idx_created_at (created_at)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- Admin activity audit trail
+CREATE TABLE IF NOT EXISTS admin_audit_log (
+  id            BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  admin_id      INT UNSIGNED  NULL COMMENT 'NULL if the actor could not be authenticated (e.g. failed login)',
+  username      VARCHAR(64)   NULL,
+  action        ENUM('login','logout','export','view_record','change_password') NOT NULL,
+  detail        VARCHAR(255)  NULL COMMENT 'e.g. the filters used for an export, or the GUID viewed',
+  ip_address    VARBINARY(16) NULL COMMENT 'INET6_ATON()',
+  created_at    TIMESTAMP     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  INDEX idx_created_at (created_at),
+  INDEX idx_admin_id (admin_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

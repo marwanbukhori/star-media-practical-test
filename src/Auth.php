@@ -40,6 +40,8 @@ final class Auth
         $update = $pdo->prepare('UPDATE admin_users SET last_login_at = :now WHERE id = :id');
         $update->execute([':now' => $now, ':id' => $admin['id']]);
 
+        AuditLog::record('login', (int) $admin['id'], $admin['username']);
+
         return true;
     }
 
@@ -61,8 +63,15 @@ final class Auth
         return $_SESSION[self::SESSION_USERNAME] ?? null;
     }
 
+    public static function currentUserId(): ?int
+    {
+        return isset($_SESSION[self::SESSION_USER_ID]) ? (int) $_SESSION[self::SESSION_USER_ID] : null;
+    }
+
     public static function logout(): void
     {
+        AuditLog::record('logout', self::currentUserId(), self::currentUsername());
+
         $_SESSION = [];
 
         if (ini_get('session.use_cookies')) {

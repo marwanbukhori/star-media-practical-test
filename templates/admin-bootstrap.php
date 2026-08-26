@@ -4,7 +4,9 @@ declare(strict_types=1);
 require __DIR__ . '/../src/Db.php';
 require __DIR__ . '/../src/Csrf.php';
 require __DIR__ . '/../src/Consent.php';
+require __DIR__ . '/../src/AuditLog.php';
 require __DIR__ . '/../src/Auth.php';
+require __DIR__ . '/../src/ConsentQuery.php';
 
 use Smg\Consent;
 
