@@ -103,21 +103,60 @@ session-timezone mismatch, and GUID links inheriting the global red link color a
 
 ---
 
+## v1.3 — automated test suite
+
+Scoped from a follow-up request on 2026-08-26 to add unit/integration/E2E coverage. Moved
+straight out of the "someday" list below into a real, run `composer install && npm install`
+suite.
+
+- [x] **PHPUnit unit tests** (`tests/Unit/`, 42 tests) — `Csrf` (token format/stability,
+      `verify()` accept/reject cases), `ConsentQuery` (status/sort/dir whitelisting, WHERE-clause
+      building for every filter combination), `Consent` (GUID v4 format via reflection,
+      `sanitizeRedirect()`'s whitelist/query-stripping, and the dialog-state logic across
+      accept/decline cookie combinations — including a real quirk this uncovered: a falsy
+      cookie version, e.g. `0`, is treated by `readAcceptCookie()`'s `empty()` checks as no
+      cookie at all, not as "outdated").
+- [x] **PHPUnit integration tests** (`tests/Integration/`, 17 tests) against a real, isolated
+      `smg_consent_test` database — the `consent_log` upsert-on-guid behavior (repeat `accept()`
+      reuses the same guid and updates the row instead of duplicating it), `login_attempts`
+      rate-limit counting (threshold, IP scoping, the 60s window boundary) and
+      `Auth::retryAfterSeconds()`, and the CSV export / admin dashboard query run through every
+      status/search/date-range combination.
+- [x] **Playwright E2E tests** (`tests/e2e/`, 16 tests) — the consent-gate state matrix (first
+      visit, accept, decline, reload-persists, "Cookie settings" reopen + dismiss, a stale cookie
+      version forcing reappearance, and the full flow with `javaScriptEnabled: false`), plus the
+      admin portal (invalid login, successful login, the 5/min lockout, dashboard filter/sort,
+      the record detail page, change-password including a reject case).
+
+**Test isolation:** a shared `Smg\Config::get()` (new `src/Config.php`, replacing four
+duplicated config-loading implementations) reads from `SMG_CONFIG_PATH` when the constant is
+defined, falling back to the real `config.php` otherwise — so `tests/config.test.php` (no
+secrets, safe to commit) can redirect every layer at `smg_consent_test` without touching
+production behavior. PHPUnit sets the constant in `tests/bootstrap.php`; the Playwright web
+server sets it via `php -d auto_prepend_file=tests/e2e/prepend.php`.
+
+**A real bug this setup caught immediately:** the Playwright config's first draft had
+`reuseExistingServer: !process.env.CI` on the conventional port 8000. An unrelated `php -S
+localhost:8000` process left running from earlier manual smoke-testing was silently reused
+instead of Playwright starting its own — meaning every E2E test ran against the real `smg_consent`
+database (no `SMG_CONFIG_PATH`, no `e2e_admin` user) instead of the isolated test one, so every
+admin-login test failed with a correct-looking "Invalid username or password". Fixed by moving
+the E2E server to a dedicated port (8098) and hard-setting `reuseExistingServer: false` — this
+suite must always own its server, never adopt whatever else happens to be listening.
+
+**Verified live** (2026-08-26): `vendor/bin/phpunit` — 59 tests, 99 assertions, all green;
+`npx playwright test` — 16 tests, all green, run twice to confirm the port fix held.
+
+---
+
 ## v1.1+ — post-submission enhancements
 
 Grouped by category. None of these block v1.0; they're what I'd propose next if this became a
 real production handoff.
 
 ### Testing & QA
-- **Unit tests (PHPUnit)** for the pure-logic pieces: `Consent::sanitizeRedirect()` (open-redirect
-  guard), GUID v4 format/uniqueness, the accept/decline/version-bump state table, `Csrf::verify()`
-  timing-safe comparison.
-- **Integration tests** against a real (test) MySQL database: the `consent_log` upsert-on-guid
-  behavior, `login_attempts` rate-limit counting, CSV export filtering.
-- **End-to-end tests (Playwright, formalized)** — the state matrix I walked through manually in
-  step 3 turned into a real spec file: 6 consent states, no-JS mode (`javaScriptEnabled: false`),
-  focus trap, mobile bottom sheet, admin login/export — so regressions get caught automatically
-  instead of by hand each time.
+- ~~Unit tests (PHPUnit)~~ / ~~Integration tests~~ / ~~End-to-end tests (Playwright)~~ — **done**,
+  see the v1.3 section above.
 - **Accessibility audit** — automated `axe-core` pass across all 4 pages + the dialog in both
   its modes, on top of the manual focus/`inert`/`aria-*` work already in v1.0.
 - **Load testing (k6 or Apache Bench)** against `consent.php` (POST under concurrency — validates

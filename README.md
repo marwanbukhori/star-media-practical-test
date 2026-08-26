@@ -60,13 +60,40 @@ public/                 index.php  about.php  privacy.php  terms.php  consent.ph
 public/admin/           login.php  index.php  logout.php  export.php
 public/assets/css/      tokens.css  site.css
 public/assets/js/       consent.js
-src/                    Db.php  Csrf.php  Consent.php  Auth.php  Mailer.php
+src/                    Config.php  Db.php  Csrf.php  Consent.php  Auth.php  Mailer.php
 templates/              bootstrap.php  admin-bootstrap.php  header.php  footer.php
                         consent-dialog.php  legal-page.php
 db/                     schema.sql
 bin/                    seed-admin.php
+tests/                  Unit/  Integration/  (PHPUnit)  e2e/  (Playwright)
 config.example.php  .gitignore  README.md
 ```
+
+## Running the tests
+
+**PHPUnit (unit + integration)** — needs a second, isolated database so it never touches local
+dev data:
+```bash
+composer install
+mysql -u root -e "CREATE DATABASE smg_consent_test CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci"
+mysql -u root smg_consent_test < <(sed 's/smg_consent/smg_consent_test/g' db/schema.sql)
+vendor/bin/phpunit
+```
+`tests/config.test.php` (committed, no secrets) points every layer at `smg_consent_test` via a
+`SMG_CONFIG_PATH` constant `tests/bootstrap.php` defines — production `config.php` is never
+touched.
+
+**Playwright E2E** — runs against the same test database, on its own port (8098) so it never
+adopts a developer's own `php -S` session:
+```bash
+cd tests/e2e
+npm install
+npx playwright install chromium
+mysql -u root smg_consent_test -e "INSERT INTO admin_users (username, password_hash) VALUES ('e2e_admin', '\$2y\$12\$TbdCtn2qqFm9Mnk04ZOM0.EoroTyRtZ/fDw0MFbNy1wcOjn9BwRBS')"
+npx playwright test
+```
+The seeded user's password is `E2ETestPass123` — change-password tests rotate and revert it, so
+re-seed if a run is interrupted mid-test.
 
 ## Design decisions
 
@@ -111,5 +138,6 @@ config.example.php  .gitignore  README.md
 ## Further reading
 - `docs/BUILD-PLAN.md` — the file-by-file build plan, assumptions, and a verification log for
   every step
-- `docs/ROADMAP.md` — what's in this v1.0 submission vs. what I'd add next (tests, CI, further
-  features) if this became a real production handoff
+- `docs/ROADMAP.md` — what's in this v1.0 submission, the admin portal and test suite added on
+  top of it, and what I'd add next (CI, accessibility/load testing, further features) if this
+  became a real production handoff
