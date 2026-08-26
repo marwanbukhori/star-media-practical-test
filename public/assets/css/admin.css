@@ -20,6 +20,13 @@
 
 /* ---------- Password field: show/hide toggle ---------- */
 
+/* The [hidden] attribute doesn't reliably apply display:none to <svg> elements in
+   every browser (confirmed: a bare hidden svg still computes display:block) — force it
+   explicitly rather than relying on the HTML UA stylesheet's [hidden] rule for SVG. */
+.smg-password-toggle svg[hidden] {
+  display: none;
+}
+
 .smg-password-field {
   position: relative;
   display: flex;
