@@ -39,7 +39,23 @@ final class Mailer
             $safeEmail
         );
 
-        return @mail($to, $subjectLine, $body, $headers);
+        $sent = @mail($to, $subjectLine, $body, $headers);
+
+        if (!$sent) {
+            // mail() returning false almost always means there's no MTA (sendmail) configured
+            // on this host at all — e.g. the Docker/Railway deploy target, which doesn't ship
+            // one. The submission itself still gets persisted to contact_messages regardless
+            // (see about.php), so nothing is lost, but nobody gets notified unless someone is
+            // watching the logs — surface it loudly rather than only in a DB column an admin
+            // would have to think to check.
+            error_log(sprintf(
+                'Mailer::sendContactMessage failed to send (no MTA configured?) — from %s, subject "%s"',
+                $safeEmail,
+                $subjectLabel
+            ));
+        }
+
+        return $sent;
     }
 
     /** Strips CR/LF so user input can never inject extra mail headers. */
