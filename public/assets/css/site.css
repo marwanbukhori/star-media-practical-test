@@ -226,6 +226,27 @@
   text-decoration: none;
 }
 
+.smg-btn[disabled] {
+  opacity: 0.7;
+  cursor: default;
+}
+
+.smg-btn__spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin-right: 8px;
+  border: 2px solid currentColor;
+  border-right-color: transparent;
+  border-radius: var(--smg-radius);
+  vertical-align: -2px;
+  animation: smg-spin 700ms linear infinite;
+}
+
+@keyframes smg-spin {
+  to { transform: rotate(360deg); }
+}
+
 /* ---------- Consent dialog ---------- */
 
 @keyframes smg-fade-in {

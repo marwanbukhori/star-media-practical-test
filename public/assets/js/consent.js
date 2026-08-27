@@ -9,7 +9,24 @@
   var dialog = overlay.querySelector('[data-smg-consent-dialog]');
   var form = overlay.querySelector('[data-smg-consent-form]');
   var acceptBtn = overlay.querySelector('[data-smg-consent-accept]');
+  var submitButtons = form ? form.querySelectorAll('button[type="submit"]') : [];
   var savedScrollY = 0;
+
+  // Captured before the submit handler ever mutates a button's label, so a dialog
+  // reopened after a prior submit (e.g. via "Cookie settings") can be reset to it.
+  for (var b = 0; b < submitButtons.length; b++) {
+    submitButtons[b].dataset.originalLabel = submitButtons[b].textContent;
+  }
+
+  function resetFormButtons() {
+    for (var i = 0; i < submitButtons.length; i++) {
+      submitButtons[i].disabled = false;
+      submitButtons[i].textContent = submitButtons[i].dataset.originalLabel;
+    }
+    if (form) {
+      form.removeAttribute('aria-busy');
+    }
+  }
 
   function isDismissible() {
     return overlay.dataset.dismissible === '1';
@@ -52,6 +69,7 @@
     if (makeDismissible) {
       overlay.dataset.dismissible = '1';
     }
+    resetFormButtons();
     overlay.hidden = false;
     lockScroll();
     setBackgroundInert(true);
@@ -127,6 +145,19 @@
       if (submitter && submitter.name) {
         formData.set(submitter.name, submitter.value);
       }
+
+      for (var i = 0; i < submitButtons.length; i++) {
+        submitButtons[i].disabled = true;
+      }
+      if (submitter) {
+        var spinner = document.createElement('span');
+        spinner.className = 'smg-btn__spinner';
+        spinner.setAttribute('aria-hidden', 'true');
+        submitter.textContent = '';
+        submitter.appendChild(spinner);
+        submitter.appendChild(document.createTextNode(submitter.dataset.originalLabel + '…'));
+      }
+      form.setAttribute('aria-busy', 'true');
 
       fetch(form.getAttribute('action'), {
         method: 'POST',
