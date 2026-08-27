@@ -34,20 +34,35 @@ final class Db
             ? constant('Pdo\\Mysql::ATTR_INIT_COMMAND')
             : PDO::MYSQL_ATTR_INIT_COMMAND;
 
-        try {
-            self::$instance = new PDO($dsn, $db['user'], $db['pass'], [
-                PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
-                PDO::ATTR_EMULATE_PREPARES   => false,
-                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
-                // The app treats every DATETIME/TIMESTAMP value as UTC (see Consent.php,
-                // Auth.php). MySQL's session time_zone defaults to the server's system zone,
-                // which would silently shift TIMESTAMP columns (login_attempts.attempted_at,
-                // admin_users.created_at, etc. — anything using CURRENT_TIMESTAMP) away from
-                // UTC. Pin it so reads/writes are consistent regardless of server config.
-                $initCommandAttr => "SET time_zone = '+00:00'",
-            ]);
-        } catch (PDOException $e) {
-            throw new PDOException('Database connection failed: ' . $e->getMessage(), (int) $e->getCode());
+        $options = [
+            PDO::ATTR_ERRMODE            => PDO::ERRMODE_EXCEPTION,
+            PDO::ATTR_EMULATE_PREPARES   => false,
+            PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+            // The app treats every DATETIME/TIMESTAMP value as UTC (see Consent.php,
+            // Auth.php). MySQL's session time_zone defaults to the server's system zone,
+            // which would silently shift TIMESTAMP columns (login_attempts.attempted_at,
+            // admin_users.created_at, etc. — anything using CURRENT_TIMESTAMP) away from
+            // UTC. Pin it so reads/writes are consistent regardless of server config.
+            $initCommandAttr => "SET time_zone = '+00:00'",
+        ];
+
+        // A host on a sleep-when-idle PaaS plan (e.g. Railway's free tier) can wake and start
+        // serving before its separately-sleeping database has finished waking, producing a
+        // brief "Connection refused" on the very first request after a period of inactivity.
+        // A couple of short, bounded retries rides through that window without masking a
+        // genuine, sustained outage — the whole loop adds at most ~900ms before giving up.
+        $attempts = 0;
+        while (true) {
+            try {
+                self::$instance = new PDO($dsn, $db['user'], $db['pass'], $options);
+                break;
+            } catch (PDOException $e) {
+                $attempts++;
+                if ($attempts >= 3) {
+                    throw new PDOException('Database connection failed: ' . $e->getMessage(), (int) $e->getCode());
+                }
+                usleep(300_000 * $attempts);
+            }
         }
 
         return self::$instance;
