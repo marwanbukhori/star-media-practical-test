@@ -5,6 +5,19 @@ pages (Home, About/Contact, Privacy Policy, Terms & Conditions) with a blocking 
 cookie-consent gate recorded to both a cookie and the database, plus a secured admin portal
 for reviewing consent acceptances.
 
+## Table of contents
+- [What's implemented](#whats-implemented)
+- [Live deployment](#live-deployment)
+- [Prerequisites](#prerequisites)
+- [Local setup](#local-setup)
+- [Run with Docker](#run-with-docker)
+- [Create an admin user](#create-an-admin-user)
+- [Local email testing](#local-email-testing)
+- [Codebase structure](#codebase-structure)
+- [Running the tests](#running-the-tests)
+- [Design decisions](#design-decisions)
+- [Further reading](#further-reading)
+
 ## What's implemented
 
 - **4 public pages** — Home, About/Contact (with a working contact form), Privacy Policy and
@@ -79,11 +92,13 @@ mail locally without a real SMTP server, point `sendmail_path` in `php.ini` (or 
 the `contact_messages` table regardless of whether delivery succeeds, so nothing is lost if
 mail isn't configured.
 
-## Project structure
+## Codebase structure
+
 ```
 public/                 index.php  about.php  privacy.php  terms.php  consent.php
-public/admin/           login.php  index.php  logout.php  export.php
-public/assets/css/      tokens.css  site.css
+public/admin/           login.php  index.php  logout.php  export.php  audit.php
+                        change-password.php  record.php
+public/assets/css/      tokens.css  site.css  home.css
 public/assets/js/       consent.js
 src/                    Config.php  Db.php  Csrf.php  Consent.php  Auth.php  Mailer.php
 templates/              bootstrap.php  admin-bootstrap.php  header.php  footer.php
@@ -92,9 +107,66 @@ db/                     schema.sql
 bin/                    seed-admin.php
 tests/                  Unit/  Integration/  (PHPUnit)  e2e/  (Playwright)
 docker/                 entrypoint.sh
+docs/                   BUILD-PLAN.md  ROADMAP.md  DEPLOYMENT.md
 Dockerfile  docker-compose.yml  .dockerignore
 config.example.php  .gitignore  README.md
 ```
+
+**`public/`** — the web root (what `php -S -t public` and the Dockerfile's `APACHE_DOCUMENT_ROOT`
+both point at). `index.php`, `about.php`, `privacy.php`, `terms.php` are the four graded pages;
+`privacy.php`/`terms.php` render through the same shared `templates/legal-page.php` since their
+only difference is which copy block they pass in. `consent.php` is the single POST endpoint the
+consent dialog's form submits to (`action=accept` or `action=decline`) — it just validates the
+CSRF token and request shape, then hands off to `Consent::accept()`/`Consent::decline()`.
+
+**`public/admin/`** — the bonus admin portal, gated by `src/Auth.php`: `login.php`, `index.php`
+(dashboard — stat cards + a searchable/paginated consent table), `record.php` (single consent
+row), `export.php` (filtered CSV), `audit.php` (login/action audit log), `change-password.php`,
+`logout.php`.
+
+**`public/assets/`** — `css/tokens.css` is copied verbatim from the design handoff and never
+edited; `site.css` is everything else, built only from `var(--smg-*)` tokens; `home.css` holds
+the homepage-only photo/gradient rules the other pages don't use. `js/consent.js` is the only
+JavaScript file in the app — strictly progressive enhancement, since every flow (including
+accept/decline) already works as a plain form POST with JS disabled.
+
+**`src/`** — framework-free PHP, one responsibility per class:
+- `Config.php` — loads `config.php` locally, or environment variables when running in Docker/
+  Railway (`src/Config.php` picks the path based on whether `MYSQLHOST` is set)
+- `Db.php` — the PDO connection, prepared statements only (`PDO::ATTR_EMULATE_PREPARES => false`)
+- `Csrf.php` — token generation/verification, used by both the consent POST and admin login
+- `Consent.php` — **the graded core.** Cookie shape (`smg_consent`/`smg_consent_declined`), GUID
+  generation, the `CONSENT_VERSION` re-consent mechanism, and `isSecureContext()` (the
+  `X-Forwarded-Proto` detection Railway's edge proxy needs)
+- `Auth.php` — admin session handling, password hashing/verification, per-IP login rate limiting
+- `Mailer.php` — the contact form's native `mail()` wrapper (see
+  [Local email testing](#local-email-testing) above, and `docs/DEPLOYMENT.md` for why it
+  silently no-ops on the Railway deployment)
+
+**`templates/`** — shared partials: `bootstrap.php`/`admin-bootstrap.php` are the require chains
++ session setup every public/admin page starts with; `header.php`/`footer.php` wrap public pages;
+`consent-dialog.php` is the actual dialog markup, injected into every public page via
+`bootstrap.php` so the gate is enforced everywhere, not just on the homepage.
+
+**`db/schema.sql`** — the whole schema, importable in one command. Five tables:
+`consent_log` (accept/decline records), `admin_users`, `login_attempts` (rate limiting),
+`contact_messages`, `admin_audit_log`.
+
+**`tests/`** — `Unit/` and `Integration/` (PHPUnit) plus `e2e/` (Playwright), each running
+against their own isolated `smg_consent_test` database — see
+[Running the tests](#running-the-tests).
+
+**`docs/`** — `BUILD-PLAN.md` (file-by-file build log with a verification note per step),
+`ROADMAP.md` (what's in v1.0 vs. what's next), `DEPLOYMENT.md` (the Railway runbook).
+
+### Suggested review path
+The consent gate is the graded core; everything else is supporting or bonus. A reasonable order:
+1. `src/Consent.php` — the cookie/GUID/version logic itself
+2. `public/consent.php` + `templates/consent-dialog.php` — how it's wired into every page
+3. `db/schema.sql` — the data model it writes to
+4. `tests/e2e/tests/consent.spec.js` — behavioral proof, including the JS-disabled case
+5. `src/Auth.php` + `public/admin/` — the bonus admin portal
+6. `docs/BUILD-PLAN.md` — assumptions and reasoning behind anything not obvious from the code
 
 ## Running the tests
 
