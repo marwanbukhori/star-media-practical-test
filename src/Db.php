@@ -48,9 +48,10 @@ final class Db
 
         // A host on a sleep-when-idle PaaS plan (e.g. Railway's free tier) can wake and start
         // serving before its separately-sleeping database has finished waking, producing a
-        // brief "Connection refused" on the very first request after a period of inactivity.
-        // A couple of short, bounded retries rides through that window without masking a
-        // genuine, sustained outage — the whole loop adds at most ~900ms before giving up.
+        // "Connection refused" on the first request after a period of inactivity. A 3-attempt/
+        // ~900ms budget turned out to be too short for this in practice (still failed live) —
+        // widened to 5 attempts / up to ~4s, which is a still-reasonable page-load delay and
+        // rides through slower cold starts without masking a genuine, sustained outage.
         $attempts = 0;
         while (true) {
             try {
@@ -58,10 +59,10 @@ final class Db
                 break;
             } catch (PDOException $e) {
                 $attempts++;
-                if ($attempts >= 3) {
+                if ($attempts >= 5) {
                     throw new PDOException('Database connection failed: ' . $e->getMessage(), (int) $e->getCode());
                 }
-                usleep(300_000 * $attempts);
+                usleep(400_000 * $attempts);
             }
         }
 
