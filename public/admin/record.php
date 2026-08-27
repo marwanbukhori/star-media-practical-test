@@ -32,11 +32,13 @@ function smg_format_mst_full(string $utcDatetime, DateTimeZone $utcTz, DateTimeZ
 
 $status = null;
 if ($record !== null) {
-    if ($record['action'] === 'declined') {
-        $status = 'declined';
+    $expiresAt = new DateTimeImmutable($record['expires_at'], $utcTz);
+    $now = new DateTimeImmutable('now', $utcTz);
+
+    if ($expiresAt < $now) {
+        $status = 'expired';
     } else {
-        $expiresAt = new DateTimeImmutable($record['expires_at'], $utcTz);
-        $status = $expiresAt < new DateTimeImmutable('now', $utcTz) ? 'expired' : 'accepted';
+        $status = $record['action'] === 'declined' ? 'declined' : 'accepted';
     }
 }
 $statusLabels = ['accepted' => 'ACCEPTED', 'declined' => 'DECLINED', 'expired' => 'EXPIRED'];

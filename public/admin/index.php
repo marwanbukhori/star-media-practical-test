@@ -76,6 +76,10 @@ $acceptedStmt = $pdo->prepare("SELECT COUNT(*) AS c FROM consent_log WHERE actio
 $acceptedStmt->execute();
 $acceptedTotal = (int) $acceptedStmt->fetch()['c'];
 
+$declinedStmt = $pdo->prepare("SELECT COUNT(*) AS c FROM consent_log WHERE action = 'declined'");
+$declinedStmt->execute();
+$declinedTotal = (int) $declinedStmt->fetch()['c'];
+
 $todayStartMst = new DateTimeImmutable('today', $mstTz);
 $todayEndMst = $todayStartMst->modify('+1 day');
 $todayStmt = $pdo->prepare(
@@ -119,13 +123,14 @@ for ($i = 0; $i < $trendDays; $i++) {
 
 function smg_row_status(array $row, DateTimeZone $utcTz): string
 {
-    if ($row['action'] === 'declined') {
-        return 'declined';
-    }
     $expiresAt = new DateTimeImmutable($row['expires_at'], $utcTz);
     $now = new DateTimeImmutable('now', $utcTz);
 
-    return $expiresAt < $now ? 'expired' : 'accepted';
+    if ($expiresAt < $now) {
+        return 'expired';
+    }
+
+    return $row['action'] === 'declined' ? 'declined' : 'accepted';
 }
 
 function smg_format_mst(string $utcDatetime, DateTimeZone $utcTz, DateTimeZone $mstTz): string
@@ -192,6 +197,10 @@ $exportHref = smg_query_url('export.php', [], $activeFilters);
         <p class="smg-stat-card__value"><?php echo number_format($acceptedTotal); ?></p>
       </div>
       <div class="smg-stat-card">
+        <p class="smg-eyebrow smg-eyebrow--muted">Declined</p>
+        <p class="smg-stat-card__value"><?php echo number_format($declinedTotal); ?></p>
+      </div>
+      <div class="smg-stat-card">
         <p class="smg-eyebrow smg-eyebrow--muted">Today</p>
         <p class="smg-stat-card__value"><?php echo number_format($todayCount); ?></p>
       </div>
@@ -211,7 +220,21 @@ $exportHref = smg_query_url('export.php', [], $activeFilters);
       </div>
       <div class="smg-admin-trend-chart">
         <?php foreach ($trend as $day): ?>
-          <div class="smg-admin-trend-bar" title="<?php echo htmlspecialchars($day['label'], ENT_QUOTES, 'UTF-8'); ?>: <?php echo $day['accepted']; ?> accepted, <?php echo $day['declined']; ?> declined">
+          <?php
+            $dayTotal = $day['accepted'] + $day['declined'];
+            $dayAriaLabel = $day['label'] . ': ' . $day['accepted'] . ' accepted, ' . $day['declined'] . ' declined';
+          ?>
+          <div
+            class="smg-admin-trend-bar"
+            tabindex="0"
+            aria-label="<?php echo htmlspecialchars($dayAriaLabel, ENT_QUOTES, 'UTF-8'); ?>"
+          >
+            <div class="smg-admin-trend-bar__tooltip" aria-hidden="true">
+              <span class="smg-admin-trend-bar__tooltip-title"><?php echo htmlspecialchars($day['label'], ENT_QUOTES, 'UTF-8'); ?></span>
+              <span class="smg-admin-trend-bar__tooltip-row"><span>Accepted</span><span><?php echo $day['accepted']; ?></span></span>
+              <span class="smg-admin-trend-bar__tooltip-row"><span>Declined</span><span><?php echo $day['declined']; ?></span></span>
+              <span class="smg-admin-trend-bar__tooltip-row"><span>Total</span><span><?php echo $dayTotal; ?></span></span>
+            </div>
             <div class="smg-admin-trend-bar__stack">
               <span class="smg-admin-trend-bar__segment smg-admin-trend-bar__segment--declined" style="height: <?php echo round($day['declined'] / $trendMax * 100); ?>%"></span>
               <span class="smg-admin-trend-bar__segment smg-admin-trend-bar__segment--accepted" style="height: <?php echo round($day['accepted'] / $trendMax * 100); ?>%"></span>

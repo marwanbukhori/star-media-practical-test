@@ -71,6 +71,20 @@ final class ConsentQueryIntegrationTest extends TestCase
         $this->assertSame([self::GUID_EXPIRED], $this->runQuery('', 'expired', '', ''));
     }
 
+    public function testStatusExpiredAlsoIncludesADeclinedRowPastItsOneDayWindow(): void
+    {
+        // Older accepted_at than GUID_EXPIRED so the DESC-ordered assertion below is
+        // deterministic rather than relying on tiebreak behavior for an identical timestamp.
+        $guidExpiredDecline = '55555555-5555-4555-8555-500000000005';
+        $this->seed($guidExpiredDecline, 'declined', '2024-01-01 04:00:00', '2024-01-02 04:00:00');
+
+        $this->assertSame(
+            [self::GUID_EXPIRED, $guidExpiredDecline],
+            $this->runQuery('', 'expired', '', '')
+        );
+        $this->assertSame([self::GUID_DECLINED], $this->runQuery('', 'declined', '', ''));
+    }
+
     public function testSearchTermMatchesOnlyTheGuidContainingIt(): void
     {
         $this->assertSame([self::GUID_EXPIRED], $this->runQuery('2222', '', '', ''));

@@ -216,6 +216,7 @@
 }
 
 .smg-admin-trend-bar {
+  position: relative;
   flex: 1;
   display: flex;
   flex-direction: column;
@@ -223,6 +224,7 @@
   justify-content: flex-end;
   height: 100%;
   gap: 8px;
+  outline: none;
 }
 
 .smg-admin-trend-bar__stack {
@@ -233,11 +235,19 @@
   flex-direction: column;
   justify-content: flex-end;
   background: var(--smg-newsprint);
+  transition: transform 150ms var(--smg-ease), filter 150ms ease;
+}
+
+.smg-admin-trend-bar:hover .smg-admin-trend-bar__stack,
+.smg-admin-trend-bar:focus-visible .smg-admin-trend-bar__stack {
+  transform: scaleX(1.15);
+  filter: brightness(1.12);
 }
 
 .smg-admin-trend-bar__segment {
   width: 100%;
   display: block;
+  transition: height 200ms ease;
 }
 
 .smg-admin-trend-bar__segment--accepted {
@@ -253,6 +263,60 @@
   font-size: 10px;
   color: var(--smg-muted);
   white-space: nowrap;
+}
+
+/* Custom tooltip, replacing the native title attribute so it can show a full breakdown
+   (accepted/declined/total) rather than one plain unstyled line, and so it can be paired
+   with a hover/focus transition. aria-hidden since the bar's own aria-label carries the
+   same information for assistive tech. */
+.smg-admin-trend-bar__tooltip {
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%;
+  min-width: 130px;
+  background: var(--smg-ink);
+  color: var(--smg-paper);
+  border-radius: var(--smg-radius);
+  padding: 8px 10px;
+  font-family: var(--smg-font-mono);
+  font-size: 11px;
+  line-height: 1.6;
+  white-space: nowrap;
+  opacity: 0;
+  transform: translate(-50%, 4px);
+  pointer-events: none;
+  transition: opacity 150ms ease, transform 150ms ease;
+  z-index: 5;
+}
+
+.smg-admin-trend-bar__tooltip::after {
+  content: '';
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 5px solid transparent;
+  border-top-color: var(--smg-ink);
+}
+
+.smg-admin-trend-bar:hover .smg-admin-trend-bar__tooltip,
+.smg-admin-trend-bar:focus-visible .smg-admin-trend-bar__tooltip {
+  opacity: 1;
+  transform: translate(-50%, 0);
+}
+
+.smg-admin-trend-bar__tooltip-title {
+  display: block;
+  margin-bottom: 4px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.smg-admin-trend-bar__tooltip-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
 }
 
 /* ---------- Record detail page ---------- */

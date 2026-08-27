@@ -87,12 +87,12 @@ final class ConsentQueryTest extends TestCase
         $this->assertSame('%50\\%\\_off%', $params[':q']);
     }
 
-    public function testBuildWhereWithDeclinedStatusAddsAnActionClauseOnly(): void
+    public function testBuildWhereWithDeclinedStatusExcludesExpiredDeclines(): void
     {
         [$sql, $params] = ConsentQuery::buildWhere('', 'declined', '', '', $this->mstTz, $this->utcTz);
 
-        $this->assertStringContainsString("action = 'declined'", $sql);
-        $this->assertArrayNotHasKey(':now', $params);
+        $this->assertStringContainsString("action = 'declined' AND expires_at >= :now", $sql);
+        $this->assertArrayHasKey(':now', $params);
     }
 
     public function testBuildWhereWithAcceptedStatusComparesExpiresAtToNow(): void
@@ -103,11 +103,12 @@ final class ConsentQueryTest extends TestCase
         $this->assertArrayHasKey(':now', $params);
     }
 
-    public function testBuildWhereWithExpiredStatusComparesExpiresAtToNow(): void
+    public function testBuildWhereWithExpiredStatusIncludesBothAcceptedAndDeclinedRows(): void
     {
         [$sql, $params] = ConsentQuery::buildWhere('', 'expired', '', '', $this->mstTz, $this->utcTz);
 
-        $this->assertStringContainsString("action = 'accepted' AND expires_at < :now", $sql);
+        $this->assertStringNotContainsString('action', $sql);
+        $this->assertStringContainsString('expires_at < :now', $sql);
         $this->assertArrayHasKey(':now', $params);
     }
 

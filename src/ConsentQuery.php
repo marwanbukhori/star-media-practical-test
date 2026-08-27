@@ -50,13 +50,18 @@ final class ConsentQuery
 
         $now = new DateTimeImmutable('now', $utcTz);
 
+        // A decline's cookie expires after 1 day too (Consent::DECLINE_TTL_SECONDS) — once its
+        // expires_at has passed, it belongs in the "expired" bucket like a stale accept does,
+        // not permanently in "declined". Both branches below are action-scoped; "expired" isn't,
+        // since it's defined purely by expires_at regardless of which action produced the row.
         if ($status === 'declined') {
-            $where[] = "action = 'declined'";
+            $where[] = "action = 'declined' AND expires_at >= :now";
+            $params[':now'] = $now->format('Y-m-d H:i:s');
         } elseif ($status === 'accepted') {
             $where[] = "action = 'accepted' AND expires_at >= :now";
             $params[':now'] = $now->format('Y-m-d H:i:s');
         } elseif ($status === 'expired') {
-            $where[] = "action = 'accepted' AND expires_at < :now";
+            $where[] = 'expires_at < :now';
             $params[':now'] = $now->format('Y-m-d H:i:s');
         }
 
