@@ -18,6 +18,19 @@ for reviewing consent acceptances.
   consent table, and a filterable CSV export
 - Responsive at 375 / 768 / 1440px throughout
 
+## Live deployment
+Deployed on [Railway](https://railway.app) from this repo's `Dockerfile` — see
+`docs/DEPLOYMENT.md` for the full runbook.
+
+- **URL:** https://star-media-practical-test-production.up.railway.app
+- **Admin login:** `/admin/login.php` — username `admin`, password `DA78E*L1-mGjyZbGsxME`
+
+Verified end-to-end against the live deployment: all 4 public pages, the consent gate (accept/
+decline cookies, `consent_log` row, `Secure` flag via Railway's `X-Forwarded-Proto` edge header),
+admin login (including rejecting a wrong password and the CSRF-invalid case on `consent.php`),
+every admin subpage (dashboard, audit log, CSV export, change password), logout clearing the
+session, and the contact form persisting to `contact_messages`.
+
 ## Prerequisites
 - PHP 8.2+ with the `pdo_mysql` extension
 - MySQL 8
