@@ -36,7 +36,7 @@ Deployed on [Railway](https://railway.app) from this repo's `Dockerfile` — see
 `docs/DEPLOYMENT.md` for the full runbook.
 
 - **URL:** https://star-media-practical-test-production.up.railway.app
-- **Admin login:** `/admin/login.php` — username `admin`, password `DA78E*L1-mGjyZbGsxME`
+- **Admin login:** `/admin/login.php` — username `admin`, password `admin123`
 
 Verified end-to-end against the live deployment: all 4 public pages, the consent gate (accept/
 decline cookies, `consent_log` row, `Secure` flag via Railway's `X-Forwarded-Proto` edge header),
