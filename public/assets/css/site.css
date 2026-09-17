@@ -375,7 +375,7 @@
   bottom: 0;
   z-index: var(--smg-z-consent);
   background: var(--smg-paper);
-  border-top: 4px solid var(--smg-red);
+  border-top: 4px solid var(--smg-ink);
 }
 
 .smg-consent-banner[hidden] {
