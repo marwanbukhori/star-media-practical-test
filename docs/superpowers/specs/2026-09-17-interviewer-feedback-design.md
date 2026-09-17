@@ -175,5 +175,5 @@ catch date parsing), `Csrf.php`, `Mailer.php` (`mail()` returns a bool; nothing 
 
 - Branch `fix/interviewer-feedback` off `main`.
 - Commits: this spec → gate exemption + bar + tests → try/catch + `ErrorPage` + tests → docs.
-  Conventional messages (`feat:` / `fix:` / `docs:`), **no AI attribution** in commits or the PR.
+  Conventional commit messages (`feat:` / `fix:` / `docs:`).
 - Push and open a PR against `main` with a summary and test plan.
