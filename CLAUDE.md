@@ -45,8 +45,8 @@ Visual reference: `docs/handoff/Star Theme Kit.dc.html` (open in a browser).
   so visitors can read what they're consenting to. While a choice is pending they show a
   non-modal sticky consent bar with the same verbatim copy (`templates/consent-form.php`, shared
   with the dialog).
-- Scroll lock must be applied **server-side** (`class="smg-locked"` on `<html>`) so
-  there is no flash of a scrollable page. JS removes it after the choice.
+- Scroll lock must be applied **server-side** (`class="smg-locked"` on `<html>`) on gated pages
+  so there is no flash of a scrollable page. JS removes it after the choice.
 - Consent copy is verbatim from the requirements PDF — never reword it.
   [Terms & Conditions] → `terms.php`, [Privacy Statement] → `privacy.php`.
 
