@@ -89,7 +89,9 @@ ideas), see `docs/ROADMAP.md`.
    are now caught where they happen — accept writes its row before the cookie and fails closed,
    decline is always honoured, the contact form and admin forms show inline errors, admin read
    pages and export render `Smg\ErrorPage` with a 503. The global exception handler stays as a
-   backstop. Spec: `docs/superpowers/specs/2026-09-17-interviewer-feedback-design.md`.
+   backstop. Spec: `docs/superpowers/specs/2026-09-17-interviewer-feedback-design.md`. Audit
+   writes on sign-in/sign-out are best-effort (they must never block access), while viewing a
+   consent record and exporting CSV fail closed — no audit row, no personal data shown.
 
 ## Status
 
