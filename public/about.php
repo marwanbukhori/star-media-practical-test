@@ -67,6 +67,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contact_submit'])) {
             exit;
         } catch (PDOException $e) {
             error_log('Contact form submission could not be saved: ' . $e->getMessage());
+            if ($emailSent) {
+                // The email already delivered the message, so the visitor must not be told to
+                // retry and re-send it.
+                header('Location: about.php?sent=1', true, 303);
+                exit;
+            }
             $errors['form'] = "We couldn't send your message right now. Please try again shortly.";
         }
     }
