@@ -18,7 +18,8 @@ Visual reference: `docs/handoff/Star Theme Kit.dc.html` (open in a browser).
 
 ## Design rules
 - Red (`--smg-red`) is a signal: max one red element per viewport on content pages.
-  The consent dialog is the one exception.
+  The consent dialog is the one exception, and so is the consent bar on privacy/terms (its
+  Accept button only — the bar's border is ink).
 - Square print aesthetic: `--smg-radius` (2px) on controls, 0 on cards. No emoji.
 - Source Serif 4 for headings, IBM Plex Sans for body, IBM Plex Mono for eyebrows/metadata/GUIDs.
 - Mobile: 44px minimum hit target, 48px on the consent buttons.
@@ -38,7 +39,13 @@ Visual reference: `docs/handoff/Star Theme Kit.dc.html` (open in a browser).
 - Accept: GUID v4 from `random_bytes(16)`; cookie `smg_consent` (JSON: guid, accepted_at, version),
   **365-day** expiry, `Path=/; Secure; HttpOnly; SameSite=Lax`; plus a `consent_log` row.
 - Decline: cookie `smg_consent_declined` with the timestamp, **1-day** expiry, no row required.
-- Scroll lock must be applied **server-side** (`class="smg-locked"` on `<html>`) so there is no
+- Accept writes the `consent_log` row **before** setting the cookie, so it fails closed: no row,
+  no cookie. Decline always sets its cookie; a failed decline row is only logged.
+- `privacy.php` and `terms.php` are exempt from the blocking gate (`Consent::GATE_EXEMPT_PAGES`)
+  so visitors can read what they're consenting to. While a choice is pending they show a
+  non-modal sticky consent bar with the same verbatim copy (`templates/consent-form.php`, shared
+  with the dialog).
+- Scroll lock must be applied **server-side** (`class="smg-locked"` on `<html>`) on gated pages so there is no
   flash of a scrollable page. JS removes it after the choice.
 - Consent copy is verbatim from the requirements PDF — never reword it.
   [Terms & Conditions] → `terms.php`, [Privacy Statement] → `privacy.php`.
@@ -47,6 +54,7 @@ Visual reference: `docs/handoff/Star Theme Kit.dc.html` (open in a browser).
 Prepared statements only. `htmlspecialchars()` on every echo. CSRF token on the consent POST and
 the admin login. `session_regenerate_id(true)` on login. `password_verify()` for auth.
 Secrets in a gitignored `config.php`; commit `config.example.php`.
+Catch `PDOException` where DB work happens and `error_log()` it; visitors only ever see an inline message or `Smg\ErrorPage`.
 
 ## Definition of done
 All 4 pages responsive at 375 / 768 / 1440. Consent gate correct on first visit, after accept,
