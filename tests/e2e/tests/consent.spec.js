@@ -110,3 +110,77 @@ test.describe('consent gate', () => {
     await context.close();
   });
 });
+
+test.describe('legal pages before a choice is made', () => {
+  test.beforeEach(() => {
+    truncate('consent_log');
+  });
+
+  for (const path of ['/terms.php', '/privacy.php']) {
+    test(`${path} is readable: no blocking dialog, no scroll lock, consent bar shown`, async ({ page }) => {
+      await page.goto(path);
+
+      await expect(page.locator('[data-smg-consent-overlay]')).toBeHidden();
+      await expect(page.locator('html')).not.toHaveClass(/smg-locked/);
+      await expect(page.locator('main')).not.toHaveAttribute('inert', '');
+      await expect(page.locator('[data-smg-consent-banner]')).toBeVisible();
+    });
+  }
+
+  test('the home page gate links through to a readable terms page', async ({ page }) => {
+    await page.goto('/index.php');
+    await expect(page.locator('[data-smg-consent-overlay]')).toBeVisible();
+
+    await page.locator('[data-smg-consent-dialog]').getByRole('link', { name: 'Terms & Conditions' }).click();
+
+    await expect(page).toHaveURL(/\/terms\.php$/);
+    await expect(page.locator('[data-smg-consent-overlay]')).toBeHidden();
+    await expect(page.locator('[data-smg-consent-banner]')).toBeVisible();
+  });
+
+  test('accepting from the bar hides it and sets the accept cookie', async ({ page, context }) => {
+    await page.goto('/terms.php');
+    const banner = page.locator('[data-smg-consent-banner]');
+
+    await banner.getByRole('button', { name: 'Accept' }).click();
+    await expect(banner).toBeHidden();
+
+    const cookies = await context.cookies();
+    expect(cookies.find((c) => c.name === 'smg_consent')).toBeTruthy();
+    expect(cookies.find((c) => c.name === 'smg_consent_declined')).toBeFalsy();
+
+    await page.reload();
+    await expect(page.locator('[data-smg-consent-banner]')).toHaveCount(0);
+  });
+
+  test('declining from the bar hides it and sets the decline cookie', async ({ page, context }) => {
+    await page.goto('/privacy.php');
+    const banner = page.locator('[data-smg-consent-banner]');
+
+    await banner.getByRole('button', { name: 'Decline' }).click();
+    await expect(banner).toBeHidden();
+
+    const cookies = await context.cookies();
+    expect(cookies.find((c) => c.name === 'smg_consent_declined')).toBeTruthy();
+    expect(cookies.find((c) => c.name === 'smg_consent')).toBeFalsy();
+  });
+
+  test('the bar works with JavaScript disabled and returns to the same legal page', async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+
+    await page.goto('/privacy.php');
+    const banner = page.locator('[data-smg-consent-banner]');
+    await expect(banner).toBeVisible();
+
+    await Promise.all([
+      page.waitForResponse((res) => res.url().endsWith('/consent.php')),
+      banner.getByRole('button', { name: 'Accept' }).click(),
+    ]);
+
+    await expect(page).toHaveURL(/\/privacy\.php$/);
+    await expect(page.locator('[data-smg-consent-banner]')).toHaveCount(0);
+
+    await context.close();
+  });
+});

@@ -34,5 +34,5 @@ session_set_cookie_params([
 ]);
 session_start();
 
-['visible' => $showDialog, 'dismissible' => $dismissible] = Consent::dialogState();
+['visible' => $showDialog, 'dismissible' => $dismissible, 'banner' => $showBanner] = Consent::dialogState();
 $consentGateOpen = $showDialog && !$dismissible;
