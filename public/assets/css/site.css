@@ -427,6 +427,22 @@
   }
 }
 
+@media (max-width: 599px) {
+  .smg-consent-banner .smg-consent-choice {
+    gap: var(--smg-space-3);
+    padding-block: var(--smg-space-3);
+  }
+
+  .smg-consent-banner .smg-consent-choice__copy {
+    gap: var(--smg-space-1);
+    font-size: var(--smg-text-xs);
+  }
+
+  .smg-consent-banner__actions {
+    gap: var(--smg-space-2);
+  }
+}
+
 /* ---------- Shared text utilities ---------- */
 
 .smg-eyebrow {
