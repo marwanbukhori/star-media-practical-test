@@ -3,6 +3,8 @@ declare(strict_types=1);
 
 namespace Smg;
 
+use RuntimeException;
+
 final class Config
 {
     /** @var array<string, mixed>|null */
@@ -32,6 +34,11 @@ final class Config
     private static function fromFile(): array
     {
         $path = defined('SMG_CONFIG_PATH') ? SMG_CONFIG_PATH : dirname(__DIR__) . '/config.php';
+
+        // A bare `require` of a missing file is a fatal error the exception handler can't catch.
+        if (!is_file($path)) {
+            throw new RuntimeException("Config file not found at {$path} — copy config.example.php to config.php.");
+        }
 
         return require $path;
     }

@@ -33,10 +33,15 @@ if (strlen($password) < 8) {
 
 $hash = password_hash($password, PASSWORD_DEFAULT);
 
-$stmt = Db::connection()->prepare(
-    'INSERT INTO admin_users (username, password_hash) VALUES (:username, :hash)
-     ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash)'
-);
-$stmt->execute([':username' => $username, ':hash' => $hash]);
+try {
+    $stmt = Db::connection()->prepare(
+        'INSERT INTO admin_users (username, password_hash) VALUES (:username, :hash)
+         ON DUPLICATE KEY UPDATE password_hash = VALUES(password_hash)'
+    );
+    $stmt->execute([':username' => $username, ':hash' => $hash]);
+} catch (PDOException $e) {
+    fwrite(STDERR, 'Could not save the admin user: ' . $e->getMessage() . "\n");
+    exit(1);
+}
 
 fwrite(STDOUT, "Admin user '{$username}' created (or password updated).\n");

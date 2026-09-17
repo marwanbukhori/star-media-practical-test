@@ -49,21 +49,26 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['contact_submit'])) {
     if (!$errors) {
         $emailSent = Mailer::sendContactMessage($values['full_name'], $values['email'], $values['subject'], $values['message']);
 
-        $stmt = Db::connection()->prepare(
-            'INSERT INTO contact_messages (full_name, email, subject, message, consent_privacy, ip_address, email_sent)
-             VALUES (:name, :email, :subject, :message, 1, INET6_ATON(:ip), :sent)'
-        );
-        $stmt->execute([
-            ':name' => $values['full_name'],
-            ':email' => $values['email'],
-            ':subject' => $values['subject'],
-            ':message' => $values['message'],
-            ':ip' => $_SERVER['REMOTE_ADDR'] ?? null,
-            ':sent' => $emailSent ? 1 : 0,
-        ]);
+        try {
+            $stmt = Db::connection()->prepare(
+                'INSERT INTO contact_messages (full_name, email, subject, message, consent_privacy, ip_address, email_sent)
+                 VALUES (:name, :email, :subject, :message, 1, INET6_ATON(:ip), :sent)'
+            );
+            $stmt->execute([
+                ':name' => $values['full_name'],
+                ':email' => $values['email'],
+                ':subject' => $values['subject'],
+                ':message' => $values['message'],
+                ':ip' => $_SERVER['REMOTE_ADDR'] ?? null,
+                ':sent' => $emailSent ? 1 : 0,
+            ]);
 
-        header('Location: about.php?sent=1', true, 303);
-        exit;
+            header('Location: about.php?sent=1', true, 303);
+            exit;
+        } catch (PDOException $e) {
+            error_log('Contact form submission could not be saved: ' . $e->getMessage());
+            $errors['form'] = "We couldn't send your message right now. Please try again shortly.";
+        }
     }
 }
 ?>

@@ -20,25 +20,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if (!Csrf::verify(is_string($csrfToken) ? $csrfToken : null)) {
         $error = 'Your session expired. Please try again.';
     } else {
-        $pdo = Db::connection();
-        $stmt = $pdo->prepare('SELECT password_hash FROM admin_users WHERE id = :id');
-        $stmt->execute([':id' => Auth::currentUserId()]);
-        $row = $stmt->fetch();
+        try {
+            $pdo = Db::connection();
+            $stmt = $pdo->prepare('SELECT password_hash FROM admin_users WHERE id = :id');
+            $stmt->execute([':id' => Auth::currentUserId()]);
+            $row = $stmt->fetch();
 
-        if (!$row || !password_verify($currentPassword, $row['password_hash'])) {
-            $error = 'Your current password is incorrect.';
-        } elseif (strlen($newPassword) < 8) {
-            $error = 'New password must be at least 8 characters.';
-        } elseif ($newPassword !== $confirmPassword) {
-            $error = 'New password and confirmation do not match.';
-        } else {
-            $update = $pdo->prepare('UPDATE admin_users SET password_hash = :hash WHERE id = :id');
-            $update->execute([
-                ':hash' => password_hash($newPassword, PASSWORD_DEFAULT),
-                ':id' => Auth::currentUserId(),
-            ]);
-            AuditLog::record('change_password', Auth::currentUserId(), Auth::currentUsername());
-            $success = true;
+            if (!$row || !password_verify($currentPassword, $row['password_hash'])) {
+                $error = 'Your current password is incorrect.';
+            } elseif (strlen($newPassword) < 8) {
+                $error = 'New password must be at least 8 characters.';
+            } elseif ($newPassword !== $confirmPassword) {
+                $error = 'New password and confirmation do not match.';
+            } else {
+                $update = $pdo->prepare('UPDATE admin_users SET password_hash = :hash WHERE id = :id');
+                $update->execute([
+                    ':hash' => password_hash($newPassword, PASSWORD_DEFAULT),
+                    ':id' => Auth::currentUserId(),
+                ]);
+                $success = true;
+                AuditLog::record('change_password', Auth::currentUserId(), Auth::currentUsername());
+            }
+        } catch (PDOException $e) {
+            error_log('Admin password change failed: ' . $e->getMessage());
+            // If only the audit write failed the password did change — don't claim otherwise.
+            if (!$success) {
+                $error = "We couldn't update your password right now. Please try again.";
+            }
         }
     }
 }

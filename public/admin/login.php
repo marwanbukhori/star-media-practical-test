@@ -25,16 +25,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     } elseif ($username === '' || $password === '') {
         $error = 'Enter your username and password.';
         $fieldError = true;
-    } elseif (Auth::isRateLimited()) {
-        $retryAfter = Auth::retryAfterSeconds();
-        $error = 'Too many attempts. Try again in ' . $retryAfter . 's.';
-        $rateLimited = true;
-    } elseif (Auth::attemptLogin($username, $password)) {
-        header('Location: index.php', true, 303);
-        exit;
     } else {
-        $error = 'Invalid username or password.';
-        $fieldError = true;
+        try {
+            if (Auth::isRateLimited()) {
+                $retryAfter = Auth::retryAfterSeconds();
+                $error = 'Too many attempts. Try again in ' . $retryAfter . 's.';
+                $rateLimited = true;
+            } elseif (Auth::attemptLogin($username, $password)) {
+                header('Location: index.php', true, 303);
+                exit;
+            } else {
+                $error = 'Invalid username or password.';
+                $fieldError = true;
+            }
+        } catch (PDOException $e) {
+            error_log('Admin sign-in unavailable: ' . $e->getMessage());
+            $error = 'Sign-in is temporarily unavailable. Please try again shortly.';
+        }
     }
 }
 ?>
