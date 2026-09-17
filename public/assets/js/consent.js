@@ -35,6 +35,27 @@
     form.removeAttribute('aria-busy');
   }
 
+  function errorFor(form) {
+    var choice = form.closest('[data-smg-consent-choice]');
+    return choice ? choice.querySelector('[data-smg-consent-error]') : null;
+  }
+
+  function hideError(form) {
+    var error = errorFor(form);
+    if (error) {
+      error.hidden = true;
+      error.textContent = '';
+    }
+  }
+
+  function showError(form) {
+    var error = errorFor(form);
+    if (error) {
+      error.hidden = false;
+      error.textContent = "We couldn't save your choice right now. Please try again.";
+    }
+  }
+
   function isDismissible() {
     return overlay.dataset.dismissible === '1';
   }
@@ -78,6 +99,7 @@
     }
     for (var i = 0; i < forms.length; i++) {
       resetForm(forms[i]);
+      hideError(forms[i]);
     }
     overlay.hidden = false;
     lockScroll();
@@ -190,6 +212,7 @@
       submitter.appendChild(document.createTextNode(submitter.dataset.originalLabel + '…'));
     }
     form.setAttribute('aria-busy', 'true');
+    hideError(form);
 
     fetch(form.getAttribute('action'), {
       method: 'POST',
@@ -203,6 +226,10 @@
       .then(function (data) {
         if (data && data.ok) {
           onChoiceSaved();
+        } else if (data && data.error === 'server_error') {
+          // Nothing was recorded, and a native re-POST would only hit the same failure.
+          resetForm(form);
+          showError(form);
         } else {
           submitNatively(form, submitter);
         }

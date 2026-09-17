@@ -11,6 +11,7 @@ $redirectTo = \Smg\Consent::currentPath();
   <div class="smg-consent-choice__copy">
     <p>Cookies are necessary for this website to function properly, for performance measurement, and to provide you with the best experience.</p>
     <p>By continuing to access or use this site, you acknowledge and consent to our use of cookies in accordance with our <a href="terms.php">Terms &amp; Conditions</a> and <a href="privacy.php">Privacy Statement</a>.</p>
+    <p class="smg-consent-choice__error" role="alert" data-smg-consent-error hidden></p>
   </div>
 
   <form method="post" action="consent.php" class="<?php echo htmlspecialchars($consentActionsClass, ENT_QUOTES, 'UTF-8'); ?>" data-smg-consent-form>

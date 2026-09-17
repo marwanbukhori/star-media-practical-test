@@ -5,9 +5,11 @@ require __DIR__ . '/../src/Config.php';
 require __DIR__ . '/../src/Db.php';
 require __DIR__ . '/../src/Csrf.php';
 require __DIR__ . '/../src/Consent.php';
+require __DIR__ . '/../src/ErrorPage.php';
 
 use Smg\Consent;
 use Smg\Csrf;
+use Smg\ErrorPage;
 
 session_set_cookie_params([
     'path' => '/',
@@ -38,10 +40,24 @@ if (!$valid) {
     exit;
 }
 
-if ($action === 'accept') {
-    Consent::accept();
-} else {
-    Consent::decline();
+try {
+    if ($action === 'accept') {
+        Consent::accept();
+    } else {
+        Consent::decline();
+    }
+} catch (\Throwable $e) {
+    // Accept writes its consent_log row before any cookie, so nothing was recorded — tell the
+    // visitor to retry instead of pretending the choice was saved.
+    error_log((string) $e);
+    if ($isFetch) {
+        http_response_code(503);
+        header('Content-Type: application/json');
+        echo json_encode(['ok' => false, 'error' => 'server_error']);
+    } else {
+        ErrorPage::render(503);
+    }
+    exit;
 }
 
 if ($isFetch) {

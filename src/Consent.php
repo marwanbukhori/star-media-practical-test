@@ -5,6 +5,7 @@ namespace Smg;
 
 use DateTimeImmutable;
 use DateTimeZone;
+use PDOException;
 
 final class Consent
 {
@@ -89,7 +90,12 @@ final class Consent
     }
 
     /**
+     * The consent_log row is written before any cookie: if the database is unavailable this throws
+     * before a Set-Cookie is queued, so a visitor can never hold an accept cookie with no matching
+     * row. consent.php catches the exception and asks the visitor to try again.
+     *
      * @return array{guid: string, accepted_at: DateTimeImmutable, expires_at: DateTimeImmutable}
+     * @throws PDOException When the consent_log row cannot be written.
      */
     public static function accept(): array
     {
@@ -99,21 +105,31 @@ final class Consent
         $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
         $expiresAt = $now->modify('+365 days');
 
+        self::logConsent($guid, 'accepted', $now, $expiresAt);
         self::writeAcceptCookie($guid, $now);
         self::clearDeclineCookie();
-        self::logConsent($guid, 'accepted', $now, $expiresAt);
 
         return ['guid' => $guid, 'accepted_at' => $now, 'expires_at' => $expiresAt];
     }
 
+    /**
+     * A decline only requires its cookie; the consent_log row just feeds the admin dashboard. A
+     * visitor's refusal must never depend on the database being up, so a failed insert is logged
+     * and the cookie is still set.
+     */
     public static function decline(): void
     {
         $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
         $expiresAt = $now->modify('+1 day');
 
+        try {
+            self::logConsent(self::generateGuidV4(), 'declined', $now, $expiresAt);
+        } catch (PDOException $e) {
+            error_log('Consent::decline could not write to consent_log: ' . $e->getMessage());
+        }
+
         self::writeDeclineCookie($now);
         self::clearAcceptCookie();
-        self::logConsent(self::generateGuidV4(), 'declined', $now, $expiresAt);
     }
 
     /**

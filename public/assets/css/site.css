@@ -341,6 +341,11 @@
   color: var(--smg-muted);
 }
 
+.smg-consent-choice__error {
+  font-weight: 600;
+  color: var(--smg-red-ink);
+}
+
 @media (max-width: 599px) {
   .smg-consent-overlay {
     padding: 0;
