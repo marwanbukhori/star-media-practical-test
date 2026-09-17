@@ -165,6 +165,49 @@ test.describe('legal pages before a choice is made', () => {
     expect(cookies.find((c) => c.name === 'smg_consent')).toBeFalsy();
   });
 
+  test('a server error from the bar shows an inline alert and records nothing', async ({ page, context }) => {
+    await page.route('**/consent.php', (route) =>
+      route.fulfill({ status: 503, contentType: 'application/json', body: '{"ok":false,"error":"server_error"}' })
+    );
+
+    await page.goto('/terms.php');
+    const banner = page.locator('[data-smg-consent-banner]');
+
+    await banner.getByRole('button', { name: 'Accept' }).click();
+
+    const error = banner.locator('[data-smg-consent-error]');
+    await expect(error).toBeVisible();
+    await expect(error).toHaveText("We couldn't save your choice right now. Please try again.");
+
+    await expect(banner).toBeVisible();
+    await expect(banner.locator('button:not([disabled])')).toHaveCount(2);
+
+    const cookies = await context.cookies();
+    expect(cookies.find((c) => c.name === 'smg_consent')).toBeFalsy();
+  });
+
+  test('declining from the bar works with JavaScript disabled', async ({ browser }) => {
+    const context = await browser.newContext({ javaScriptEnabled: false });
+    const page = await context.newPage();
+
+    await page.goto('/terms.php');
+    const banner = page.locator('[data-smg-consent-banner]');
+    await expect(banner).toBeVisible();
+
+    await Promise.all([
+      page.waitForResponse((res) => res.url().endsWith('/consent.php')),
+      banner.getByRole('button', { name: 'Decline' }).click(),
+    ]);
+
+    await expect(page).toHaveURL(/\/terms\.php$/);
+    await expect(page.locator('[data-smg-consent-banner]')).toHaveCount(0);
+
+    const cookies = await context.cookies();
+    expect(cookies.find((c) => c.name === 'smg_consent_declined')).toBeTruthy();
+
+    await context.close();
+  });
+
   test('the bar works with JavaScript disabled and returns to the same legal page', async ({ browser }) => {
     const context = await browser.newContext({ javaScriptEnabled: false });
     const page = await context.newPage();
