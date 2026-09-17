@@ -22,6 +22,7 @@ final class ErrorPage
             . 'max-width:32rem;margin:4rem auto;padding:0 1.5rem;color:#1a1a1a;">'
             . '<h1 style="font-size:1.25rem;">We hit a snag</h1>'
             . '<p>Something went wrong loading this page. Please try again in a moment.</p>'
+            . '<p><a href="/">Return to the homepage</a></p>'
             . '</body></html>';
     }
 }

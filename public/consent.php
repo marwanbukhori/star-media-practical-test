@@ -47,8 +47,9 @@ try {
         Consent::decline();
     }
 } catch (\Throwable $e) {
-    // Accept writes its consent_log row before any cookie, so nothing was recorded — tell the
-    // visitor to retry instead of pretending the choice was saved.
+    // The choice may not have been saved (accept writes its consent_log row before any cookie,
+    // so a database failure leaves nothing half-done) — ask the visitor to retry instead of
+    // pretending it worked.
     error_log((string) $e);
     if ($isFetch) {
         http_response_code(503);
