@@ -103,6 +103,7 @@ final class ConsentTest extends TestCase
         $state = Consent::dialogState();
         $this->assertTrue($state['visible']);
         $this->assertFalse($state['dismissible']);
+        $this->assertFalse($state['banner']);
     }
 
     public function testShouldShowDialogIsFalseWithAValidCurrentVersionAcceptCookie(): void
@@ -172,6 +173,72 @@ final class ConsentTest extends TestCase
         $state = Consent::dialogState();
         $this->assertTrue($state['visible']);
         $this->assertFalse($state['dismissible']);
+        $this->assertFalse($state['banner']);
+    }
+
+    // ---------------------------------------------------------------- gate-exempt legal pages
+
+    public function testIsGateExemptPageMatchesOnlyThePrivacyAndTermsPages(): void
+    {
+        foreach (['/privacy.php' => true, '/terms.php' => true, '/index.php' => false, '/about.php' => false] as $script => $expected) {
+            $_SERVER['SCRIPT_NAME'] = $script;
+            $this->assertSame($expected, Consent::isGateExemptPage(), $script);
+        }
+    }
+
+    public function testLegalPagesShowTheBannerInsteadOfTheBlockingDialog(): void
+    {
+        foreach (['/privacy.php', '/terms.php'] as $script) {
+            $_SERVER['SCRIPT_NAME'] = $script;
+
+            $state = Consent::dialogState();
+            $this->assertFalse($state['visible'], $script);
+            $this->assertFalse($state['dismissible'], $script);
+            $this->assertTrue($state['banner'], $script);
+        }
+    }
+
+    public function testNonLegalPagesStillForceTheBlockingDialog(): void
+    {
+        foreach (['/index.php', '/about.php'] as $script) {
+            $_SERVER['SCRIPT_NAME'] = $script;
+
+            $state = Consent::dialogState();
+            $this->assertTrue($state['visible'], $script);
+            $this->assertFalse($state['dismissible'], $script);
+            $this->assertFalse($state['banner'], $script);
+        }
+    }
+
+    public function testManageOnALegalPageOpensADismissibleDialogAndKeepsTheBanner(): void
+    {
+        $_SERVER['SCRIPT_NAME'] = '/terms.php';
+        $_GET['consent'] = 'manage';
+
+        $state = Consent::dialogState();
+        $this->assertTrue($state['visible']);
+        $this->assertTrue($state['dismissible']);
+        $this->assertTrue($state['banner']);
+    }
+
+    public function testLegalPagesShowNoBannerOnceConsentIsGiven(): void
+    {
+        $_SERVER['SCRIPT_NAME'] = '/privacy.php';
+        $_COOKIE[Consent::ACCEPT_COOKIE] = json_encode([
+            'guid' => '11111111-1111-4111-8111-111111111111',
+            'accepted_at' => '2026-01-01T00:00:00+08:00',
+            'version' => Consent::CONSENT_VERSION,
+        ]);
+
+        $this->assertFalse(Consent::dialogState()['banner']);
+    }
+
+    public function testLegalPagesShowNoBannerWithAValidDeclineCookie(): void
+    {
+        $_SERVER['SCRIPT_NAME'] = '/terms.php';
+        $_COOKIE[Consent::DECLINE_COOKIE] = '2026-01-01T00:00:00+08:00';
+
+        $this->assertFalse(Consent::dialogState()['banner']);
     }
 
     // ---------------------------------------------------------------- currentRecord
