@@ -5,6 +5,7 @@ use Smg\Auth;
 use Smg\AuditLog;
 use Smg\ConsentQuery;
 use Smg\Db;
+use Smg\ErrorPage;
 
 Auth::requireLogin();
 
@@ -24,14 +25,22 @@ $filterSummary = trim(implode(' ', array_filter([
     $dateFrom !== '' ? "from={$dateFrom}" : '',
     $dateTo !== '' ? "to={$dateTo}" : '',
 ]))) ?: 'no filters';
-AuditLog::record('export', Auth::currentUserId(), Auth::currentUsername(), $filterSummary);
+try {
+    AuditLog::record('export', Auth::currentUserId(), Auth::currentUsername(), $filterSummary);
 
-$pdo = Db::connection();
-$stmt = $pdo->prepare(
-    "SELECT guid, action, consent_version, accepted_at, expires_at FROM consent_log
-     WHERE {$whereSql} ORDER BY accepted_at DESC"
-);
-$stmt->execute($params);
+    $pdo = Db::connection();
+    $stmt = $pdo->prepare(
+        "SELECT guid, action, consent_version, accepted_at, expires_at FROM consent_log
+         WHERE {$whereSql} ORDER BY accepted_at DESC"
+    );
+    $stmt->execute($params);
+} catch (PDOException $e) {
+    // No CSV header has been sent yet, so this can still be a proper error page rather than a
+    // truncated download. Without its audit record, the export doesn't run.
+    error_log('Admin export failed: ' . $e->getMessage());
+    ErrorPage::render(503);
+    exit;
+}
 
 $filename = 'consent-export-' . (new DateTimeImmutable('now', $mstTz))->format('Y-m-d') . '.csv';
 

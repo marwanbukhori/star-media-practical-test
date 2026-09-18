@@ -4,6 +4,7 @@ require __DIR__ . '/../../templates/admin-bootstrap.php';
 use Smg\Auth;
 use Smg\AuditLog;
 use Smg\Db;
+use Smg\ErrorPage;
 
 Auth::requireLogin();
 
@@ -14,15 +15,21 @@ $guid = trim((string) ($_GET['guid'] ?? ''));
 $record = null;
 
 if ($guid !== '') {
-    AuditLog::record('view_record', Auth::currentUserId(), Auth::currentUsername(), $guid);
+    try {
+        AuditLog::record('view_record', Auth::currentUserId(), Auth::currentUsername(), $guid);
 
-    $stmt = Db::connection()->prepare(
-        'SELECT guid, action, consent_version, accepted_at, expires_at, ip_address, user_agent, created_at
-         FROM consent_log WHERE guid = :guid'
-    );
-    $stmt->bindValue(':guid', $guid);
-    $stmt->execute();
-    $record = $stmt->fetch() ?: null;
+        $stmt = Db::connection()->prepare(
+            'SELECT guid, action, consent_version, accepted_at, expires_at, ip_address, user_agent, created_at
+             FROM consent_log WHERE guid = :guid'
+        );
+        $stmt->bindValue(':guid', $guid);
+        $stmt->execute();
+        $record = $stmt->fetch() ?: null;
+    } catch (PDOException $e) {
+        error_log('Admin consent record could not load: ' . $e->getMessage());
+        ErrorPage::render(503);
+        exit;
+    }
 }
 
 function smg_format_mst_full(string $utcDatetime, DateTimeZone $utcTz, DateTimeZone $mstTz): string

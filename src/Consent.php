@@ -5,6 +5,7 @@ namespace Smg;
 
 use DateTimeImmutable;
 use DateTimeZone;
+use PDOException;
 
 final class Consent
 {
@@ -20,6 +21,9 @@ final class Consent
     private const DISPLAY_TIMEZONE = 'Asia/Kuala_Lumpur';
 
     private const ALLOWED_REDIRECT_PAGES = ['index.php', 'about.php', 'privacy.php', 'terms.php'];
+
+    /** Pages the blocking gate never covers: the documents its own copy asks visitors to read. */
+    private const GATE_EXEMPT_PAGES = ['privacy.php', 'terms.php'];
 
     private const GUID_PATTERN = '/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i';
 
@@ -46,6 +50,11 @@ final class Consent
         return isset($_GET['consent']) && $_GET['consent'] === 'manage';
     }
 
+    public static function isGateExemptPage(): bool
+    {
+        return in_array(basename($_SERVER['SCRIPT_NAME'] ?? 'index.php'), self::GATE_EXEMPT_PAGES, true);
+    }
+
     /**
      * The visitor's own accepted-consent record, for display (e.g. the "Your consent record"
      * callout on the legal pages). Null if they've never accepted or their cookie is gone.
@@ -58,21 +67,35 @@ final class Consent
     }
 
     /**
-     * @return array{visible: bool, dismissible: bool}
+     * How the consent prompt is presented on the current page:
+     *  - visible:     the modal dialog is rendered open
+     *  - dismissible: Esc/backdrop may close it (false while a choice is still mandatory)
+     *  - banner:      the non-modal consent bar is rendered instead of forcing the dialog —
+     *                 legal pages only, while a choice is still pending
+     *
+     * @return array{visible: bool, dismissible: bool, banner: bool}
      */
     public static function dialogState(): array
     {
-        $forced = self::shouldShowDialog();
-        $visible = $forced || self::isManageRequested();
+        $pending = self::shouldShowDialog();
+        $exempt = self::isGateExemptPage();
+        $blocking = $pending && !$exempt;
+        $visible = $blocking || self::isManageRequested();
 
         return [
             'visible' => $visible,
-            'dismissible' => $visible && !$forced,
+            'dismissible' => $visible && !$blocking,
+            'banner' => $pending && $exempt,
         ];
     }
 
     /**
+     * The consent_log row is written before any cookie: if the database is unavailable this throws
+     * before a Set-Cookie is queued, so a visitor can never hold an accept cookie with no matching
+     * row. consent.php catches the exception and asks the visitor to try again.
+     *
      * @return array{guid: string, accepted_at: DateTimeImmutable, expires_at: DateTimeImmutable}
+     * @throws PDOException When the consent_log row cannot be written.
      */
     public static function accept(): array
     {
@@ -82,21 +105,31 @@ final class Consent
         $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
         $expiresAt = $now->modify('+365 days');
 
+        self::logConsent($guid, 'accepted', $now, $expiresAt);
         self::writeAcceptCookie($guid, $now);
         self::clearDeclineCookie();
-        self::logConsent($guid, 'accepted', $now, $expiresAt);
 
         return ['guid' => $guid, 'accepted_at' => $now, 'expires_at' => $expiresAt];
     }
 
+    /**
+     * A decline only requires its cookie; the consent_log row just feeds the admin dashboard. A
+     * visitor's refusal must never depend on the database being up, so a failed insert is logged
+     * and the cookie is still set.
+     */
     public static function decline(): void
     {
         $now = new DateTimeImmutable('now', new DateTimeZone('UTC'));
         $expiresAt = $now->modify('+1 day');
 
+        try {
+            self::logConsent(self::generateGuidV4(), 'declined', $now, $expiresAt);
+        } catch (PDOException $e) {
+            error_log('Consent::decline could not write to consent_log: ' . $e->getMessage());
+        }
+
         self::writeDeclineCookie($now);
         self::clearAcceptCookie();
-        self::logConsent(self::generateGuidV4(), 'declined', $now, $expiresAt);
     }
 
     /**

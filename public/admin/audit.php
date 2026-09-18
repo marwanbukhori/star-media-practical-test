@@ -3,6 +3,7 @@ require __DIR__ . '/../../templates/admin-bootstrap.php';
 
 use Smg\Auth;
 use Smg\AuditLog;
+use Smg\ErrorPage;
 
 Auth::requireLogin();
 
@@ -10,7 +11,13 @@ $mstTz = new DateTimeZone('Asia/Kuala_Lumpur');
 $utcTz = new DateTimeZone('UTC');
 
 $page = max(1, (int) ($_GET['page'] ?? 1));
-$result = AuditLog::recent($page, 25);
+try {
+    $result = AuditLog::recent($page, 25);
+} catch (PDOException $e) {
+    error_log('Admin audit log could not load: ' . $e->getMessage());
+    ErrorPage::render(503);
+    exit;
+}
 
 $actionLabels = [
     'login' => 'Signed in',

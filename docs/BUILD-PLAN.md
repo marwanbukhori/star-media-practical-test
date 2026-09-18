@@ -83,6 +83,15 @@ ideas), see `docs/ROADMAP.md`.
    nothing is lost if local mail delivery isn't configured. README documents pointing
    `sendmail_path` at Mailpit/MailHog for local capture.
 5. **Admin CSV export is filterable** — honors the same `?q=` GUID search param as the table.
+6. **Interviewer feedback (2026-09-17)** — (a) the gate blocked the very pages its copy links to;
+   `privacy.php`/`terms.php` are now exempt and show a non-modal sticky consent bar instead
+   (`Consent::GATE_EXEMPT_PAGES`, `dialogState()['banner']`). (b) "No try/catch blocks": failures
+   are now caught where they happen — accept writes its row before the cookie and fails closed,
+   decline is always honoured, the contact form and admin forms show inline errors, admin read
+   pages and export render `Smg\ErrorPage` with a 503. The global exception handler stays as a
+   backstop. Spec: `docs/superpowers/specs/2026-09-17-interviewer-feedback-design.md`. Audit
+   writes on sign-in/sign-out are best-effort (they must never block access), while viewing a
+   consent record and exporting CSV fail closed — no audit row, no personal data shown.
 
 ## Status
 

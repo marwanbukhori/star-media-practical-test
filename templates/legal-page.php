@@ -83,6 +83,9 @@ $currentScript = basename($_SERVER['SCRIPT_NAME'] ?? 'privacy.php');
   </main>
 
   <?php require __DIR__ . '/footer.php'; ?>
+  <?php if ($showBanner): ?>
+    <?php require __DIR__ . '/consent-banner.php'; ?>
+  <?php endif; ?>
   <?php require __DIR__ . '/consent-dialog.php'; ?>
   <script src="assets/js/consent.js" defer></script>
 </body>

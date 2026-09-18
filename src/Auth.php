@@ -6,6 +6,7 @@ namespace Smg;
 use DateTimeImmutable;
 use DateTimeZone;
 use PDO;
+use PDOException;
 
 final class Auth
 {
@@ -36,11 +37,17 @@ final class Auth
         $_SESSION[self::SESSION_USER_ID] = (int) $admin['id'];
         $_SESSION[self::SESSION_USERNAME] = $admin['username'];
 
-        $now = (new DateTimeImmutable('now', new DateTimeZone('UTC')))->format('Y-m-d H:i:s');
-        $update = $pdo->prepare('UPDATE admin_users SET last_login_at = :now WHERE id = :id');
-        $update->execute([':now' => $now, ':id' => $admin['id']]);
+        // Bookkeeping only: the credentials are verified and the session is established, so a
+        // failed timestamp or audit write must not turn a valid sign-in into an error page.
+        try {
+            $now = (new DateTimeImmutable('now', new DateTimeZone('UTC')))->format('Y-m-d H:i:s');
+            $update = $pdo->prepare('UPDATE admin_users SET last_login_at = :now WHERE id = :id');
+            $update->execute([':now' => $now, ':id' => $admin['id']]);
 
-        AuditLog::record('login', (int) $admin['id'], $admin['username']);
+            AuditLog::record('login', (int) $admin['id'], $admin['username']);
+        } catch (PDOException $e) {
+            error_log('Auth::attemptLogin bookkeeping failed: ' . $e->getMessage());
+        }
 
         return true;
     }
@@ -70,7 +77,12 @@ final class Auth
 
     public static function logout(): void
     {
-        AuditLog::record('logout', self::currentUserId(), self::currentUsername());
+        // Signing out must always work, even if the audit record can't be written.
+        try {
+            AuditLog::record('logout', self::currentUserId(), self::currentUsername());
+        } catch (PDOException $e) {
+            error_log('Auth::logout could not write the audit record: ' . $e->getMessage());
+        }
 
         $_SESSION = [];
 

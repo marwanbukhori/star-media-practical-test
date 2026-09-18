@@ -5,13 +5,12 @@ use Smg\Auth;
 use Smg\Consent;
 use Smg\ConsentQuery;
 use Smg\Db;
+use Smg\ErrorPage;
 
 Auth::requireLogin();
 
 $mstTz = new DateTimeZone('Asia/Kuala_Lumpur');
 $utcTz = new DateTimeZone('UTC');
-
-$pdo = Db::connection();
 
 // ---------------------------------------------------------------- filters
 
@@ -47,76 +46,84 @@ function smg_query_url(string $base, array $overrides, array $filters): string
 
 $activeFilters = smg_active_filters($q, $status, $dateFrom, $dateTo, $sort, $dir);
 
-// ---------------------------------------------------------------- table + pagination
+try {
+    $pdo = Db::connection();
 
-$perPage = 20;
-$page = max(1, (int) ($_GET['page'] ?? 1));
+    // ---------------------------------------------------------------- table + pagination
 
-$countStmt = $pdo->prepare("SELECT COUNT(*) AS total FROM consent_log WHERE {$whereSql}");
-$countStmt->execute($params);
-$total = (int) $countStmt->fetch()['total'];
-$totalPages = max(1, (int) ceil($total / $perPage));
-$page = min($page, $totalPages);
-$offset = ($page - 1) * $perPage;
+    $perPage = 20;
+    $page = max(1, (int) ($_GET['page'] ?? 1));
 
-$listSql = "SELECT guid, action, consent_version, accepted_at, expires_at FROM consent_log
-            WHERE {$whereSql} ORDER BY {$sort} {$dir} LIMIT :limit OFFSET :offset";
-$listStmt = $pdo->prepare($listSql);
-foreach ($params as $key => $value) {
-    $listStmt->bindValue($key, $value);
-}
-$listStmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
-$listStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
-$listStmt->execute();
-$rows = $listStmt->fetchAll();
+    $countStmt = $pdo->prepare("SELECT COUNT(*) AS total FROM consent_log WHERE {$whereSql}");
+    $countStmt->execute($params);
+    $total = (int) $countStmt->fetch()['total'];
+    $totalPages = max(1, (int) ceil($total / $perPage));
+    $page = min($page, $totalPages);
+    $offset = ($page - 1) * $perPage;
 
-// ---------------------------------------------------------------- stat cards
+    $listSql = "SELECT guid, action, consent_version, accepted_at, expires_at FROM consent_log
+                WHERE {$whereSql} ORDER BY {$sort} {$dir} LIMIT :limit OFFSET :offset";
+    $listStmt = $pdo->prepare($listSql);
+    foreach ($params as $key => $value) {
+        $listStmt->bindValue($key, $value);
+    }
+    $listStmt->bindValue(':limit', $perPage, PDO::PARAM_INT);
+    $listStmt->bindValue(':offset', $offset, PDO::PARAM_INT);
+    $listStmt->execute();
+    $rows = $listStmt->fetchAll();
 
-$acceptedStmt = $pdo->prepare("SELECT COUNT(*) AS c FROM consent_log WHERE action = 'accepted'");
-$acceptedStmt->execute();
-$acceptedTotal = (int) $acceptedStmt->fetch()['c'];
+    // ---------------------------------------------------------------- stat cards
 
-$declinedStmt = $pdo->prepare("SELECT COUNT(*) AS c FROM consent_log WHERE action = 'declined'");
-$declinedStmt->execute();
-$declinedTotal = (int) $declinedStmt->fetch()['c'];
+    $acceptedStmt = $pdo->prepare("SELECT COUNT(*) AS c FROM consent_log WHERE action = 'accepted'");
+    $acceptedStmt->execute();
+    $acceptedTotal = (int) $acceptedStmt->fetch()['c'];
 
-$todayStartMst = new DateTimeImmutable('today', $mstTz);
-$todayEndMst = $todayStartMst->modify('+1 day');
-$todayStmt = $pdo->prepare(
-    "SELECT COUNT(*) AS c FROM consent_log WHERE action = 'accepted' AND accepted_at >= :start AND accepted_at < :end"
-);
-$todayStmt->execute([
-    ':start' => $todayStartMst->setTimezone($utcTz)->format('Y-m-d H:i:s'),
-    ':end' => $todayEndMst->setTimezone($utcTz)->format('Y-m-d H:i:s'),
-]);
-$todayCount = (int) $todayStmt->fetch()['c'];
+    $declinedStmt = $pdo->prepare("SELECT COUNT(*) AS c FROM consent_log WHERE action = 'declined'");
+    $declinedStmt->execute();
+    $declinedTotal = (int) $declinedStmt->fetch()['c'];
 
-// ---------------------------------------------------------------- 14-day trend chart
+    $todayStartMst = new DateTimeImmutable('today', $mstTz);
+    $todayEndMst = $todayStartMst->modify('+1 day');
+    $todayStmt = $pdo->prepare(
+        "SELECT COUNT(*) AS c FROM consent_log WHERE action = 'accepted' AND accepted_at >= :start AND accepted_at < :end"
+    );
+    $todayStmt->execute([
+        ':start' => $todayStartMst->setTimezone($utcTz)->format('Y-m-d H:i:s'),
+        ':end' => $todayEndMst->setTimezone($utcTz)->format('Y-m-d H:i:s'),
+    ]);
+    $todayCount = (int) $todayStmt->fetch()['c'];
 
-$trendDays = 14;
-$trendStartMst = $todayStartMst->modify('-' . ($trendDays - 1) . ' days');
-$trendStmt = $pdo->prepare(
-    "SELECT DATE(CONVERT_TZ(accepted_at, '+00:00', '+08:00')) AS day, action, COUNT(*) AS c
-     FROM consent_log
-     WHERE accepted_at >= :start
-     GROUP BY day, action"
-);
-$trendStmt->execute([':start' => $trendStartMst->setTimezone($utcTz)->format('Y-m-d H:i:s')]);
+    // ---------------------------------------------------------------- 14-day trend chart
 
-$trendData = [];
-foreach ($trendStmt->fetchAll() as $row) {
-    $trendData[$row['day']][$row['action']] = (int) $row['c'];
-}
+    $trendDays = 14;
+    $trendStartMst = $todayStartMst->modify('-' . ($trendDays - 1) . ' days');
+    $trendStmt = $pdo->prepare(
+        "SELECT DATE(CONVERT_TZ(accepted_at, '+00:00', '+08:00')) AS day, action, COUNT(*) AS c
+         FROM consent_log
+         WHERE accepted_at >= :start
+         GROUP BY day, action"
+    );
+    $trendStmt->execute([':start' => $trendStartMst->setTimezone($utcTz)->format('Y-m-d H:i:s')]);
 
-$trend = [];
-$trendMax = 1;
-for ($i = 0; $i < $trendDays; $i++) {
-    $day = $trendStartMst->modify("+{$i} days");
-    $key = $day->format('Y-m-d');
-    $accepted = $trendData[$key]['accepted'] ?? 0;
-    $declined = $trendData[$key]['declined'] ?? 0;
-    $trend[] = ['label' => $day->format('j M'), 'accepted' => $accepted, 'declined' => $declined];
-    $trendMax = max($trendMax, $accepted + $declined);
+    $trendData = [];
+    foreach ($trendStmt->fetchAll() as $row) {
+        $trendData[$row['day']][$row['action']] = (int) $row['c'];
+    }
+
+    $trend = [];
+    $trendMax = 1;
+    for ($i = 0; $i < $trendDays; $i++) {
+        $day = $trendStartMst->modify("+{$i} days");
+        $key = $day->format('Y-m-d');
+        $accepted = $trendData[$key]['accepted'] ?? 0;
+        $declined = $trendData[$key]['declined'] ?? 0;
+        $trend[] = ['label' => $day->format('j M'), 'accepted' => $accepted, 'declined' => $declined];
+        $trendMax = max($trendMax, $accepted + $declined);
+    }
+} catch (PDOException $e) {
+    error_log('Admin dashboard could not load: ' . $e->getMessage());
+    ErrorPage::render(503);
+    exit;
 }
 
 // ---------------------------------------------------------------- display helpers

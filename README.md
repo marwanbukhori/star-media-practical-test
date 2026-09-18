@@ -1,9 +1,10 @@
 # Star Media Group — 4-Page Consent Site
 
 A practical-test build in PHP 8.2+ and MySQL 8, no framework, no build step. Four public
-pages (Home, About/Contact, Privacy Policy, Terms & Conditions) with a blocking first-visit
-cookie-consent gate recorded to both a cookie and the database, plus a secured admin portal
-for reviewing consent acceptances.
+pages (Home, About/Contact, Privacy Policy, Terms & Conditions) with a first-visit
+cookie-consent gate (blocking everywhere except the Privacy Policy and Terms pages, which
+stay readable) recorded to both a cookie and the database, plus a secured admin portal for
+reviewing consent acceptances.
 
 ## Table of contents
 - [What's implemented](#whats-implemented)
@@ -24,7 +25,8 @@ for reviewing consent acceptances.
   Terms & Conditions (one shared template)
 - **Consent gate** — blocking on first visit, works with JavaScript fully disabled (real form
   POST + redirect), scroll-locked server-side with no flash, reappears on cookie expiry or a
-  bumped notice version
+  bumped notice version. Privacy Policy and Terms & Conditions are never blocked — visitors read
+  them first and choose from a sticky consent bar. Accept fails closed if the database is down.
 - **Contact form** — server-side validated, sends via PHP's native `mail()`, persisted to the
   database regardless of delivery outcome
 - **Admin portal** (bonus) — authenticated dashboard with stat cards, a searchable/paginated
@@ -120,8 +122,8 @@ flowchart TD
 | `public/` | `index.php` `about.php` `privacy.php` `terms.php` `consent.php` | The four graded pages, plus the single POST endpoint the consent dialog's form submits to (`action=accept`/`decline`) — it validates CSRF/shape then hands off to `Consent::accept()`/`decline()`. `privacy.php`/`terms.php` share one `templates/legal-page.php`. |
 | `public/admin/` | `login.php` `index.php` `record.php` `export.php` `audit.php` `change-password.php` `logout.php` | The bonus admin portal, gated by `src/Auth.php`. `index.php` is the dashboard (stat cards + searchable/paginated table); `export.php` is a filtered CSV. |
 | `public/assets/` | `css/tokens.css` `site.css` `home.css`, `js/consent.js` | `tokens.css` is copied verbatim from the design handoff, never edited. `consent.js` is the *only* JS file in the app — strictly progressive enhancement; every flow already works as a plain form POST with JS disabled. |
-| `src/` | `Config.php` `Db.php` `Csrf.php` `Consent.php` `Auth.php` `Mailer.php` | Framework-free, one responsibility per class. **`Consent.php` is the graded core** — cookie shape, GUID generation, the `CONSENT_VERSION` re-consent mechanism, and the `X-Forwarded-Proto` secure-context check Railway's edge needs. |
-| `templates/` | `bootstrap.php` `admin-bootstrap.php` `header.php` `footer.php` `consent-dialog.php` `legal-page.php` | Shared partials. `bootstrap.php` is the require chain + session setup every public page starts with, and injects `consent-dialog.php` so the gate is enforced everywhere, not just the homepage. |
+| `src/` | `Config.php` `Db.php` `Csrf.php` `Consent.php` `ConsentQuery.php` `Auth.php` `AuditLog.php` `Mailer.php` `ErrorPage.php` | Framework-free, one responsibility per class. **`Consent.php` is the graded core** — cookie shape, GUID generation, the `CONSENT_VERSION` re-consent mechanism, and the `X-Forwarded-Proto` secure-context check Railway's edge needs. `ErrorPage.php` is the one generic error page every explicit catch and the global handler render. |
+| `templates/` | `bootstrap.php` `admin-bootstrap.php` `header.php` `footer.php` `consent-dialog.php` `consent-banner.php` `consent-form.php` `legal-page.php` | Shared partials. `bootstrap.php` is the require chain + session setup every public page starts with. `consent-form.php` holds the verbatim consent copy and form, shared by the blocking `consent-dialog.php` and the non-modal `consent-banner.php` shown on the legal pages. |
 | `db/schema.sql` | 5 tables | `consent_log`, `admin_users`, `login_attempts` (rate limiting), `contact_messages`, `admin_audit_log` — importable in one command. |
 | `bin/seed-admin.php` | 1 script | Interactive CLI that creates the first admin user. |
 | `tests/` | `Unit/` `Integration/` (PHPUnit), `e2e/` (Playwright) | Each runs against its own isolated `smg_consent_test` database — see [Running the tests](#running-the-tests). |
@@ -131,7 +133,8 @@ flowchart TD
 ### Suggested review path
 The consent gate is the graded core; everything else is supporting or bonus. A reasonable order:
 1. `src/Consent.php` — the cookie/GUID/version logic itself
-2. `public/consent.php` + `templates/consent-dialog.php` — how it's wired into every page
+2. `public/consent.php` + `templates/consent-form.php` (shared by `consent-dialog.php` and
+   `consent-banner.php`) — how it's wired into every page
 3. `db/schema.sql` — the data model it writes to
 4. `tests/e2e/tests/consent.spec.js` — behavioral proof, including the JS-disabled case
 5. `src/Auth.php` + `public/admin/` — the bonus admin portal
